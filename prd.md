@@ -1,0 +1,1 @@
+# Criar PRD (Product Requirement Document) base do projeto
