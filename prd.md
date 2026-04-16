@@ -8,23 +8,42 @@
 
 Atualmente diversas ferramentas propõem avaliar empresas listadas na bolsa de valores, porém nenhuma delas de forma visual, interativa e grátis.
 
-Neste sentido o presente projeto objetiva a criação de uma aplicação onde será possível analisar a saúde financeiras e possíveis tendências de forma profissional sobre estas empresas.
+Neste sentido o presente projeto objetiva a criação de uma aplicação onde será possível analisar a saúde financeira e possíveis tendências de forma profissional sobre estas empresas.
+
+## Solução Proposta
+1) Criar um coletor de dados que captará todos os cvs dos últimos anos para as empresas listadas na Comissão de Valores Mobiliários (CVM)
+
+2) Unificar, limpar e transformar as informações criando uma base de dados confiável;
+
+3) Criar um dashboard para analise das empresas utilizando power BI e streamlit;
 
 ## Requisitos
-1) Coletar dados de empresas listadas na bolsa entre outras da comissão de valores mobiliários (CVM)
+A aplicação deverá conter a seguinte documentação
+- **main.py**: roda o pipeline principal contendo a aplicação
+- **utils.py**: contém as funções que serão utilizadas no projeto
+- **dash.py**: código para gerar o dashboard no streamlit
 
-2) Limpeza, transformação e criação de uma base de dados para disponibilização;
+### **Detalhamento de requisitos**
+- **main.py**
+O que deverá conter?
 
-3) Criação de um dashboard para analise das empresas utilizando power BI e streamlit;
+- **utils.py**
+O que deverá conter?
 
+- **dash.py**
+O que deverá conter?
 
-### *1) Funções*
+**Stack:**
+- Python: 3.12.1
+- Streamlit
+- Pandas
 
-Criação de função para listar e fazer o download dos arquivos no site da CVM
+## Métricas
+como saberemos se funcionou?
 
-### *2) Função para unificar os arquivos em um somente e salvar em .csv ou .xlsx*
+## Fora de escopo
+o que não vamos fazer?
 
-### *3) Função para identificar níveis no plano de contas do balanço patrimonial*
-
-### *4) Transferir arquivos que serao utilizados no dashboard*
+## Riscos e dependências
+o que pode bloquear
  
