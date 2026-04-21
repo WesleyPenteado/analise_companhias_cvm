@@ -70,15 +70,3 @@ def download_and_extract(ano: int, pasta_destino: str):
     except zipfile.BadZipFile:
         print(f"❌ Arquivo ZIP inválido para o ano {ano}")
 
-
-
-# ------------- Loop Principal (Levar para Main)
-
-os.makedirs(RAW_DIR, exist_ok=True)
-
-anos = get_available_years()
-
-
-for ano in anos:
-    download_and_extract(ano, RAW_DIR)
-
