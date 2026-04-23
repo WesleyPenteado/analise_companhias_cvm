@@ -8,7 +8,7 @@ import io
 import zipfile
 import re
 
-# 1. Criando caminhos para os arquivos
+# 1. Criando Diretórios para os arquivos
 BASE_DIR = Path(__file__).resolve().parent.parent
 RAW_DIR = BASE_DIR / 'data' / 'raw'
 RAW_DIR.mkdir(parents=True, exist_ok=True) 

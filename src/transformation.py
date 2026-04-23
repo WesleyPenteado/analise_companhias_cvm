@@ -2,19 +2,21 @@ import pandas as pd
 from pathlib import Path
 import os
 import openpyxl
+from validator import validate_df_DRE
 
-# Criando caminhos para os arquivos
+# Diretórios para os arquivos
 BASE_DIR = Path(__file__).resolve().parent.parent
 RAW_DIR = BASE_DIR / 'data' / 'raw'
 CLEAN_DIR = BASE_DIR / 'data' / 'clean'
+CLEAN_DIR.mkdir(parents=True, exist_ok=True) 
 CHECK_DIR = BASE_DIR / 'data' / 'check'
+CHECK_DIR.mkdir(parents=True, exist_ok=True) 
 
 
 # Unificar as bases de dados em um único DataFrame de acordo com os tipos de arquivos (DFC, DRE, BPA, BPP e etc)
 
 def unificar_bases_dre_con(RAW_DIR: str) -> pd.DataFrame:
     '''Unifica os arquivos DRE_consolidada em um único DataFrame.'''
-    df_DRE_con = pd.DataFrame()
 
     df_DRE_con = []
 
@@ -36,6 +38,21 @@ def unificar_bases_dre_con(RAW_DIR: str) -> pd.DataFrame:
     # extrair ano da coluna de data
     df_DRE_con_final['ANO'] = df_DRE_con_final['DT_REFER'].dt.year.astype('Int64')
 
+    # validar o DataFrame
+    valid_rows, errors = validate_df_DRE(df_DRE_con_final)
+    print(f'Linhas válidas: {len(valid_rows)}')
+    print(f'Erros encontrados: {len(errors)}')
+
+    # salvar erros e avisar usuário
+    df_errors = pd.DataFrame(errors)
+    df_errors.to_csv(CHECK_DIR / "dre_errors.csv", index=False)
+    
+    if errors:
+        print("\n⚠️  inconsistências encontradas, favor analisar arquivo na pasta check.")
+    else:
+        print("\n ✅  Nenhum erro encontrado na validação.")
+    
+
     # salva depois de terminar a concatenação
     df_DRE_con_final.to_csv(
         CLEAN_DIR / 'DRE_con_unificado.csv',
@@ -51,14 +68,15 @@ def unificar_bases_dre_con(RAW_DIR: str) -> pd.DataFrame:
 
 
 
-if __name__ == "__main__":
+
 
 
 # # ---------------testes---------------
+if __name__ == "__main__":
 
-#     df = unificar_bases_dre_con(RAW_DIR)
+    df = unificar_bases_dre_con(RAW_DIR)
 
-#     df = pd.read_csv(CLEAN_DIR / 'DRE_con_unificado.csv', encoding='latin1', sep=';')
+    # df = pd.read_csv(CLEAN_DIR / 'DRE_con_unificado.csv', encoding='latin1', sep=';')
 
 #     df.to_excel(
 #         CHECK_DIR / 'DRE_con_unificado.xlsx',
