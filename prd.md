@@ -2,7 +2,7 @@
 
 ## *Problema*
 
-    Analisar demonstrações financeiras de empresas listadas em bolsa de valores através de um dashboard de forma gratuita.
+    Usuários não têm acesso gratuito, estruturado e confiável para análise de demonstrações financeiras de empresas listadas na CVM.
 
 ## **Contexto e objetivo**
 
@@ -10,40 +10,64 @@ Atualmente diversas ferramentas propõem avaliar empresas listadas na bolsa de v
 
 Neste sentido o presente projeto objetiva a criação de uma aplicação onde será possível analisar a saúde financeira e possíveis tendências de forma profissional sobre estas empresas.
 
-## Solução Proposta
-1) Criar um coletor de dados que captará todos os cvs dos últimos anos para as empresas listadas na Comissão de Valores Mobiliários (CVM)
+## Objetivo
+Criar uma plataforma de dados financeiros que:
 
-2) Unificar, limpar e transformar as informações criando uma base de dados confiável;
+- Coleta dados públicos da CVM
+- Garante qualidade via validação de schema
+- Estrutura dados em modelo analítico
+- Disponibiliza visualização interativa
 
-3) Criar um dashboard para analise das empresas utilizando power BI e streamlit;
+## Arquitetura
 
-## Requisitos
-A aplicação deverá conter a seguinte documentação
-- **main.py**: roda o pipeline principal contendo a aplicação
-- **utils.py**: contém as funções que serão utilizadas no projeto
-- **dash.py**: código para gerar o dashboard no streamlit
+[ Coleta ]  
+   ↓  
+[ Raw CSV ]  
+   ↓  
+[ Validação (Pydantic) ]  
+   ↓  
+[ Dados Limpos ]  
+   ↓  
+[ Data Warehouse (SQLAlchemy) ]  
+   ↓  
+[ Dashboard (Streamlit / Power BI) ]
 
-### **Detalhamento de requisitos**
-- **main.py**
-O que deverá conter?
-
-- **utils.py**
-O que deverá conter?
-
-- **dash.py**
-O que deverá conter?
+## Estrutura
 
 **Stack:**
 - Python: 3.12.1
 - Streamlit
 - Pandas
+- Pydantic
+- sqlalchemy
 
-## Métricas
-como saberemos se funcionou?
+
+project/  
+│  
+├── data/  
+│   ├── raw/  
+│   ├── clean/  
+│  
+├── src/  
+│   ├── ingestion/  
+│   ├── validation/  
+│   ├── transformation/  
+│   ├── database/  
+│   ├── dashboard/  
+│  
+├── schemas/  
+├── models/  
+├── app/  
+│   └── streamlit_app.py  
+│  
+├── main.py  
+
 
 ## Fora de escopo
-o que não vamos fazer?
+- Machine Learning
+- Previsão financeira
+- Dados em tempo real
 
 ## Riscos e dependências
-o que pode bloquear
- 
+- CSVs inconsistentes da CVM
+- Mudança no formato dos dados
