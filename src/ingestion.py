@@ -44,7 +44,7 @@ def get_available_years():
 
 
 
-# 3. Baixando arquivos zip
+# 3. Baixando e extraindo arquivos zip
 
 def download_and_extract(ano: int, pasta_destino: str):
     '''Baixa e extrai o arquivo ZIP de todos os anos disponíveis para a pasta de destino data/raw.'''
