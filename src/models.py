@@ -1,11 +1,14 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.sql import func
+from sqlalchemy import Column, Integer, String, Date, Numeric
+from sqlalchemy.orm import declarative_base
 from database import Base
 
 Base = declarative_base()
 
-class DRE(Base):
+class DRE_Model(Base):
     __tablename__ = "dre_con"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
     CNPJ_CIA = Column(String, nullable=False)
     DT_REFER = Column(Date, nullable=True)
     VERSAO = Column(Integer, nullable=False)

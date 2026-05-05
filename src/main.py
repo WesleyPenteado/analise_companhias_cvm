@@ -1,11 +1,33 @@
-from transformation import unificar_bases_dre_con
-from load import load_dre_to_db, load_to_db
+from ingestion import get_available_years, download_and_extract
+from transformation import unificar_bases_dre
+from load import load_dre_to_db
+from pathlib import Path
 
-RAW_DIR = "data/raw"
+BASE_DIR = Path(__file__).resolve().parent.parent
+RAW_DIR = BASE_DIR / 'data' / 'raw'
+RAW_DIR.mkdir(parents=True, exist_ok=True)
+CLEAN_DIR = BASE_DIR / 'data' / 'clean'
+CLEAN_DIR.mkdir(parents=True, exist_ok=True)
 
-def run_pipeline():
-    df = unificar_bases_dre_con(RAW_DIR)
+def main():
+    print("🔎 Buscando anos disponíveis...")
+    anos = get_available_years()
+    
+    print(f"📅 Anos encontrados: {anos}")
+
+    for ano in anos:
+        download_and_extract(ano, str(RAW_DIR))
+    print("✅ Download e extração concluídos!")
+
+    print("Iniciando transoformação dos dados...")
+    df = unificar_bases_dre(RAW_DIR)
+    
+    print("💾 Carregando no banco...")
     load_dre_to_db(df)
+    
+    print("✅ Processamento concluído!")
+
+
 
 if __name__ == "__main__":
-    run_pipeline()
+    main()

@@ -15,31 +15,31 @@ CHECK_DIR.mkdir(parents=True, exist_ok=True)
 
 # Unificar as bases de dados em um único DataFrame de acordo com os tipos de arquivos (DFC, DRE, BPA, BPP e etc)
 
-def unificar_bases_dre_con(RAW_DIR: str) -> pd.DataFrame:
-    '''Unifica os arquivos DRE_consolidada em um único DataFrame.'''
+def unificar_bases_dre(RAW_DIR: str) -> pd.DataFrame:
+    '''Unifica os arquivos DRE em um único DataFrame.'''
 
-    df_DRE_con = []
+    df_DRE = []
 
     for file in os.listdir(RAW_DIR):
-        if "DRE_con" in file:
+        if "DRE" in file:
             file_path = os.path.join(RAW_DIR, file)
             df_temp = pd.read_csv(file_path, encoding='latin1', sep=';', low_memory=False)
             print(f"{file} -> {len(df_temp)} linhas") # ponto de conferência
-            df_DRE_con.append(df_temp)
+            df_DRE.append(df_temp)
 
-    df_DRE_con_final = pd.concat(df_DRE_con, ignore_index=True)
-    print(f' Total de linhas no final: {len(df_DRE_con_final)}')
+    df_DRE_final = pd.concat(df_DRE, ignore_index=True)
+    print(f' Total de linhas no final: {len(df_DRE_final)}')
 
     # converter para data
-    df_DRE_con_final['DT_REFER'] = pd.to_datetime(
-        df_DRE_con_final['DT_REFER'], errors='coerce'
+    df_DRE_final['DT_REFER'] = pd.to_datetime(
+        df_DRE_final['DT_REFER'], errors='coerce'
     )
 
     # extrair ano da coluna de data
-    df_DRE_con_final['ANO'] = df_DRE_con_final['DT_REFER'].dt.year.astype('Int64')
+    df_DRE_final['ANO'] = df_DRE_final['DT_REFER'].dt.year.astype('Int64')
 
     # validar o DataFrame
-    valid_rows, errors = validate_df_DRE(df_DRE_con_final)
+    valid_rows, errors = validate_df_DRE(df_DRE_final)
     print(f'Linhas válidas: {len(valid_rows)}')
     print(f'Erros encontrados: {len(errors)}')
 
@@ -54,14 +54,14 @@ def unificar_bases_dre_con(RAW_DIR: str) -> pd.DataFrame:
     
 
     # salva depois de terminar a concatenação
-    df_DRE_con_final.to_csv(
-        CLEAN_DIR / 'DRE_con_unificado.csv',
+    df_DRE_final.to_csv(
+        CLEAN_DIR / 'DRE_unificado.csv',
         index=False,
         encoding='latin1',
         sep=';'
     )
 
-    return df_DRE_con_final
+    return df_DRE_final
 
 
 
@@ -74,12 +74,12 @@ def unificar_bases_dre_con(RAW_DIR: str) -> pd.DataFrame:
 # # ---------------testes---------------
 if __name__ == "__main__":
 
-    df = unificar_bases_dre_con(RAW_DIR)
+    df = unificar_bases_dre(RAW_DIR)
 
-    # df = pd.read_csv(CLEAN_DIR / 'DRE_con_unificado.csv', encoding='latin1', sep=';')
+    # df = pd.read_csv(CLEAN_DIR / 'DRE_unificado.csv', encoding='latin1', sep=';')
 
 #     df.to_excel(
-#         CHECK_DIR / 'DRE_con_unificado.xlsx',
+#         CHECK_DIR / 'DRE_unificado.xlsx',
 #         index=False,
 #         engine='openpyxl',
 #     )
