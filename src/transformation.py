@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 import os
 import openpyxl
-from validator import validate_df_DRE
+from validator import validador_df_DRE
 
 # Diretórios para os arquivos
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,6 +11,9 @@ CLEAN_DIR = BASE_DIR / 'data' / 'clean'
 CLEAN_DIR.mkdir(parents=True, exist_ok=True) 
 CHECK_DIR = BASE_DIR / 'data' / 'check'
 CHECK_DIR.mkdir(parents=True, exist_ok=True) 
+DB_DIR = BASE_DIR / 'data' / 'db'
+DB_DIR.mkdir(parents=True, exist_ok=True)
+
 
 
 # Unificar as bases de dados em um único DataFrame de acordo com os tipos de arquivos (DFC, DRE, BPA, BPP e etc)
@@ -27,19 +30,54 @@ def unificar_bases_dre(RAW_DIR: str) -> pd.DataFrame:
             print(f"{file} -> {len(df_temp)} linhas") # ponto de conferência
             df_DRE.append(df_temp)
 
-    df_DRE_final = pd.concat(df_DRE, ignore_index=True)
+
+    df_DRE_final =pd.concat(df_DRE, ignore_index=True)
+    
     print(f' Total de linhas no final: {len(df_DRE_final)}')
 
+    return df_DRE_final
+
+    # =========================
+    # TRATAMENTOS
+    # =========================
+
+def transformar_dre(df: pd.DataFrame) -> pd.DataFrame:
+    '''Realiza os tratamentos necessários'''
+
     # converter para data
-    df_DRE_final['DT_REFER'] = pd.to_datetime(
-        df_DRE_final['DT_REFER'], errors='coerce'
+    date_cols = ['DT_REFER', 'DT_INI_EXERC', 'DT_FIM_EXERC']
+
+    for col in date_cols:
+        df[col] = pd.to_datetime(
+            df[col],
+            errors='coerce'
+        ).dt.date  
+    
+    
+    # extrair ano da coluna de data
+    df['ANO'] = pd.to_datetime(
+        df['DT_REFER'],
+        errors='coerce'
+    ).dt.year.astype('Int64')
+
+    # substituir NaN por None
+    df = df.astype(object).where(
+        pd.notnull(df),
+        None
     )
 
-    # extrair ano da coluna de data
-    df_DRE_final['ANO'] = df_DRE_final['DT_REFER'].dt.year.astype('Int64')
+    return df
 
-    # validar o DataFrame
-    valid_rows, errors = validate_df_DRE(df_DRE_final)
+
+    # =========================
+    # VALIDAÇÃO
+    # =========================
+
+def validar_dre(df: pd.DataFrame):
+    '''Valida os dados e salva erros'''
+
+    valid_rows, errors = validador_df_DRE(df)
+
     print(f'Linhas válidas: {len(valid_rows)}')
     print(f'Erros encontrados: {len(errors)}')
 
@@ -51,17 +89,24 @@ def unificar_bases_dre(RAW_DIR: str) -> pd.DataFrame:
         print("\n⚠️  inconsistências encontradas, favor analisar arquivo na pasta check.")
     else:
         print("\n ✅  Nenhum erro encontrado na validação.")
+
+    return valid_rows, errors
     
 
+ # =========================
+# SALVAMENTO CSV CLEAN
+# =========================
+
+def salvar_dre(df: pd.DataFrame) -> None:
+    '''Salva o DataFrame final em um arquivo CSV.'''
+
     # salva depois de terminar a concatenação
-    df_DRE_final.to_csv(
+    df.to_csv(
         CLEAN_DIR / 'DRE_unificado.csv',
         index=False,
         encoding='latin1',
         sep=';'
     )
-
-    return df_DRE_final
 
 
 
@@ -72,14 +117,7 @@ def unificar_bases_dre(RAW_DIR: str) -> pd.DataFrame:
 
 
 # # ---------------testes---------------
-if __name__ == "__main__":
 
-    df = unificar_bases_dre(RAW_DIR)
 
-    # df = pd.read_csv(CLEAN_DIR / 'DRE_unificado.csv', encoding='latin1', sep=';')
 
-#     df.to_excel(
-#         CHECK_DIR / 'DRE_unificado.xlsx',
-#         index=False,
-#         engine='openpyxl',
-#     )
+

@@ -2,10 +2,9 @@ from sqlalchemy import Column, Integer, String, Date, Numeric
 from sqlalchemy.orm import declarative_base
 from database import Base
 
-Base = declarative_base()
 
 class DRE_Model(Base):
-    __tablename__ = "dre_con"
+    __tablename__ = "dre"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
 

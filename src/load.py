@@ -1,15 +1,26 @@
-from database import SessionLocal
+from database import SessionLocal, engine, Base
 from models import DRE_Model
 
+Base.metadata.create_all(bind=engine)
+
 def load_dre_to_db(df):
+
     db = SessionLocal()
+
     try:
         data = df.to_dict(orient="records")
-        db.bulk_insert_mappings(DRE_Model, data)
+
+        objects = [DRE_Model(**row) for row in data]
+
+        db.add_all(objects)
+
         db.commit()
+
         print(f"{len(data)} registros inseridos")
+
     except Exception as e:
         db.rollback()
         print(e)
+
     finally:
         db.close()

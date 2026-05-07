@@ -2,7 +2,7 @@ from typing import List, Tuple
 from schema import DRE_Schema
 
 
-def validate_df_DRE(df) -> Tuple[List[DRE_Schema], List[dict]]:
+def validador_df_DRE(df) -> Tuple[List[DRE_Schema], List[dict]]:
     valid_rows = []
     errors = []
 
