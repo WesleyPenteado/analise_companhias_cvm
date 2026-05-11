@@ -56,7 +56,7 @@ def transformar_dre(df: pd.DataFrame) -> pd.DataFrame:
     
     # extrair ano da coluna de data
     df['ANO'] = pd.to_datetime(
-        df['DT_REFER'],
+        df['DT_FIM_EXERC'],
         errors='coerce'
     ).dt.year.astype('Int64')
 
@@ -65,6 +65,9 @@ def transformar_dre(df: pd.DataFrame) -> pd.DataFrame:
         pd.notnull(df),
         None
     )
+
+    # filtrar somente última versão
+    df = df[df['ORDEM_EXERC'] == 'ÚLTIMO']
 
     return df
 
