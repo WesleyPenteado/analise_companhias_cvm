@@ -69,7 +69,18 @@ def transformar_dre(df: pd.DataFrame) -> pd.DataFrame:
     # filtrar somente última versão
     df = df[df['ORDEM_EXERC'] == 'ÚLTIMO']
 
+
+    # tratando duplicidades
+    colunas_chave = ['CNPJ_CIA', 'CD_CVM', 'GRUPO_DFP', 'CD_CONTA', 'ANO']
+
+    duplicados = df.duplicated(subset=colunas_chave, keep=False)
+    if duplicados.any():
+        print(f"[WARN] {duplicados.sum()} linhas duplicadas encontradas — mantendo primeira ocorrência.")
+
+    df = df.drop_duplicates(subset=colunas_chave, keep='first')
+
     return df
+
 
 
     # =========================
