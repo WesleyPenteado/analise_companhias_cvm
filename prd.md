@@ -50,13 +50,15 @@ project/
 │  
 ├── src/  
 │   ├── ingestion/  
-│   ├── validation/  
+│   ├── schema/
+│   ├── validator/
 │   ├── transformation/  
-│   ├── database/  
-│   ├── dashboard/  
+│   ├── database/
+│   ├── models/
+│   ├── load/
+│   ├── dashboard/
+│   ├── main/
 │  
-├── schemas/  
-├── models/  
 ├── app/  
 │   └── streamlit_app.py  
 │  

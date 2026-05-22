@@ -1,2 +1,83 @@
-.venv
+# ====================================
+# PYTHON
+# ====================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# ====================================
+# AMBIENTE VIRTUAL
+# ====================================
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# ====================================
+# DADOS E BANCO DE DADOS
+# ====================================
 data/
+*.db
+*.sqlite
+*.sqlite3
+*.csv
+*.xlsx
+*.parquet
+
+# ====================================
+# STREAMLIT
+# ====================================
+.streamlit/secrets.toml
+
+# ====================================
+# CREDENCIAIS E VARIÁVEIS DE AMBIENTE
+# ====================================
+.env
+.env.*
+secrets.toml
+*.key
+*.pem
+
+# ====================================
+# EDITORES E IDEs
+# ====================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ====================================
+# JUPYTER
+# ====================================
+.ipynb_checkpoints/
+*.ipynb
+
+# ====================================
+# LOGS
+# ====================================
+*.log
+logs/
+
+# ====================================
+# ARQUIVOS DE BACKUP
+# ====================================
+*copy*
+*backup*
+*.bak
