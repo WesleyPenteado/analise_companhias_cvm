@@ -1,6 +1,8 @@
 import pandas as pd
+import streamlit as st
 from sqlalchemy import create_engine
 from pathlib import Path
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # sobe de src/
 DB_PATH = BASE_DIR / "data" / "db" / "dre.db"
@@ -8,17 +10,6 @@ DB_PATH = BASE_DIR / "data" / "db" / "dre.db"
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 engine = create_engine(DATABASE_URL)
-
-# dashboard.py — adicione esta função
-def formatar_brl(df):
-    colunas_valor = ["Ano_2025", "Ano_2024", "Ano_2023", "Ano_2022", "Ano_2021"]
-    df_fmt = df.copy()
-    for col in colunas_valor:
-        if col in df_fmt.columns:
-            df_fmt[col] = df_fmt[col].apply(
-                lambda x: f"{x:_.0f}".replace(".", ",").replace("_", ".") if pd.notna(x) else ""
-            )
-    return df_fmt
 
 
 def get_empresas():
@@ -101,6 +92,90 @@ def get_mg_bruta_card(empresa, grupo):
         return float(df.iloc[0]["VL_CONTA"])
     
     return 0
+
+def get_ebit_card(empresa, grupo):
+    
+    query = f"""
+    WITH ultimo_ano_empresa AS (
+        SELECT MAX(ANO) AS max_ano
+        FROM dre
+        WHERE DENOM_CIA = '{empresa}'
+        AND GRUPO_DFP = '{grupo}'
+    )
+    SELECT
+    VL_CONTA
+    FROM dre
+    WHERE 
+    (DS_CONTA LIKE "%Resultado Antes do Resultado%" OR DS_CONTA LIKE "%Resultado Antes dos Tributos%")
+    AND ANO = (SELECT max_ano FROM ultimo_ano_empresa)
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo}'
+    ORDER BY 
+    CASE 
+        WHEN DS_CONTA LIKE '%Resultado Antes do Resultado%' THEN 1
+        ELSE 2
+    END
+    LIMIT 1;
+    """
+    df = pd.read_sql(query, engine)
+
+    if not df.empty:
+        return float(df.iloc[0]["VL_CONTA"])
+    
+    return 0
+
+def get_ebitda_card(empresa, grupo):
+    
+    query = f"""
+    WITH ultimo_ano_empresa AS (
+        SELECT MAX(ANO) AS max_ano
+        FROM dre
+        WHERE DENOM_CIA = '{empresa}'
+        AND GRUPO_DFP = '{grupo}'
+    )
+    SELECT
+    COALESCE(SUM(VL_CONTA), 0) AS VL_CONTA 
+    FROM dre
+    WHERE 
+    (DS_CONTA LIKE "%Deprecia%" OR DS_CONTA LIKE "%Amort%" OR DS_CONTA LIKE "%Provisão%")
+    AND ANO = (SELECT max_ano FROM ultimo_ano_empresa)
+    AND SUBSTR(CD_CONTA, 1, 4) <= '3.04' -- somente contas de resultado operacional no filtro
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo}';
+    """
+    df = pd.read_sql(query, engine)
+
+    if not df.empty:
+        return float(df.iloc[0]["VL_CONTA"]) * -1 # invertendo sinal para somar ao EBIT depois
+    
+    return 0
+
+
+def get_lucro_liquido(empresa, grupo):
+    query = f"""
+    WITH ultimo_ano_empresa AS (
+        SELECT MAX(ANO) AS max_ano
+        FROM dre
+        WHERE DENOM_CIA = '{empresa}'
+        AND GRUPO_DFP = '{grupo}'
+    )
+    SELECT
+    VL_CONTA
+    FROM dre
+    WHERE CD_CONTA = '3.11'
+    AND ANO = (SELECT max_ano FROM ultimo_ano_empresa)
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo}';
+    """
+    df = pd.read_sql(query, engine)
+
+    if not df.empty:
+        return float(df.iloc[0]["VL_CONTA"])
+    
+    return 0
+
+
+
 
 def get_dre_empresa(empresa, grupo):
     

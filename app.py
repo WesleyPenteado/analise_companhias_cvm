@@ -1,13 +1,20 @@
 import streamlit as st
 
-from src.dashboard_dre import (
+from src.utils.components import kpi_card
+from src.utils.formatters import (
+    formatar_brl_tabela_DRE,
+    format_brl
+)
+from src.queries_dre import (
     get_empresas,
     get_grupos,
     get_dre_empresa,
-    formatar_brl,
     get_receita_card,
     ano_mais_recente,
-    get_mg_bruta_card
+    get_mg_bruta_card,
+    get_ebit_card,
+    get_ebitda_card,
+    get_lucro_liquido
 )
 
 # ====================================
@@ -57,7 +64,7 @@ pagina = st.sidebar.radio(
 
 if pagina == "DRE":
 
-    st.title("📊 DRE Dashboard - CVM")
+    st.title("📊 DRE - Demonstração do Resultado do Exercício")
 
     # ====================================
     # CARDS TOPO PÁGINA
@@ -80,55 +87,43 @@ if pagina == "DRE":
         st.warning("Nenhum dado disponível para a empresa e grupo selecionados.")
 
 
+
+    # KPI's cards
     col1, col2, col3, col4 = st.columns(4)
     
-    valor1 = get_receita_card(empresa, grupo)
-    valor2 = get_mg_bruta_card(empresa, grupo)
+    # Valores inteiros
+    v_receita = get_receita_card(empresa, grupo)
+    v_mg_bruta = get_mg_bruta_card(empresa, grupo)
+    v_ebit = get_ebit_card(empresa, grupo)
+    v_ebitda = get_ebitda_card(empresa, grupo)
+    v_ebitda = v_ebit + v_ebitda
+    v_lucro_liquido = get_lucro_liquido(empresa, grupo)
 
     # Formata o número no padrão brasileiro
-    valor_formatado1 = f"R$ {valor1:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    valor_formatado2 = f"R$ {valor2:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    valor_formatado1 = format_brl(v_receita)
+    valor_formatado2 = format_brl(v_mg_bruta)
+    valor_formatado3 = format_brl(v_ebitda)
+    valor_formatado4 = format_brl(v_lucro_liquido)
 
+    # KPI's percentuais
+    perc_mg_bruta = (v_mg_bruta / v_receita) * 100 if v_receita else 0
+    perc_ebitda = (v_ebitda / v_receita) * 100 if v_receita else 0
+    perc_lucro_liquido = (v_lucro_liquido / v_receita) * 100 if v_receita else 0
 
     
     with col1:
-        st.html(f"""
-        <div style="
-            background-color: #FFFFFF;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #E5E7EB;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        ">
-            <p style="color: #6B7280; font-size: 14px; margin: 0 0 8px 0;">
-                Receita Líquida
-            </p>
-            <h2 style="color: #111827; margin: 0; font-size: 32px; font-weight: 700;">
-                {valor_formatado1}
-            </h2>
-        </div>
-        """)
+        kpi_card("Receita Líquida", valor_formatado1)
 
     with col2:
-        st.html(f"""
-        <div style="
-            background-color: #FFFFFF;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #E5E7EB;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        ">
-            <p style="color: #6B7280; font-size: 14px; margin: 0 0 8px 0;">
-                Margem Bruta
-            </p>
-            <h2 style="color: #111827; margin: 0; font-size: 32px; font-weight: 700;">
-                {valor_formatado2}
-            </h2>
-        </div>
-        """)
-    
+        kpi_card("Margem Bruta", valor_formatado2, perc_mg_bruta)
+ 
+    with col3:
+        kpi_card("EBITDA", valor_formatado3, perc_ebitda)
+
+    with col4:
+        kpi_card("Lucro Líquido", valor_formatado4, perc_lucro_liquido)
+
+   
     
     df = get_dre_empresa(empresa, grupo)
 
@@ -144,7 +139,7 @@ if pagina == "DRE":
     )
 
     st.dataframe(
-        formatar_brl(df),
+        formatar_brl_tabela_DRE(df),
         use_container_width=True,
         hide_index=True
     )
