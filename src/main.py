@@ -10,14 +10,14 @@ CLEAN_DIR = BASE_DIR / 'data' / 'clean'
 CLEAN_DIR.mkdir(parents=True, exist_ok=True)
 
 def main():
-    # print("🔎 Buscando anos disponíveis...")
-    # anos = get_available_years()
+    print("🔎 Buscando anos disponíveis...")
+    anos = get_available_years()
     
-    # print(f"📅 Anos encontrados: {anos}")
+    print(f"📅 Anos encontrados: {anos}")
 
-    # for ano in anos:
-    #     download_and_extract(ano, str(RAW_DIR))
-    # print("✅ Download e extração concluídos!")
+    for ano in anos:
+        download_and_extract(ano, str(RAW_DIR))
+    print("✅ Download e extração concluídos!")
 
     print("Iniciando processamento dos dados...")
     df = unificar_bases_dre(RAW_DIR)
