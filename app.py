@@ -1,6 +1,9 @@
 import streamlit as st
 
-from src.utils.components import kpi_card
+from src.utils.components import (
+    kpi_card,
+    line_chart
+)
 from src.utils.formatters import (
     formatar_brl_tabela_DRE,
     format_brl
@@ -14,7 +17,9 @@ from src.queries_dre import (
     get_mg_bruta_card,
     get_ebit_card,
     get_ebitda_card,
-    get_lucro_liquido
+    get_lucro_liquido,
+    get_receita_todos_os_anos,
+    get_kpis_todos_os_anos
 )
 
 # ====================================
@@ -66,6 +71,7 @@ if pagina == "DRE":
 
     st.title("📊 DRE - Demonstração do Resultado do Exercício")
 
+
     # ====================================
     # CARDS TOPO PÁGINA
     # ====================================  
@@ -74,21 +80,33 @@ if pagina == "DRE":
 
     if ultimo_ano:
         st.markdown(
-        f"""
-        <p style='text-align: left;
-        color: gray;
-        font-size: 0.85em;'>
-        KPI's referentes ao ano mais recente disponível: {ultimo_ano}.
-        </p>
-        """,
-        unsafe_allow_html=True
+            f"""
+            <ul style='
+                color: gray;
+                font-size: 0.85em;
+                padding-left: 18px;
+                margin-top: 0;
+                margin-bottom: 0;
+            '>
+                <li style='margin-bottom: 2px;'>
+                    KPI's referentes ao ano mais recente disponível: {ultimo_ano}.
+                </li>
+                <li>
+                    Valores expressos em R$ mil
+                </li>
+            </ul>
+            """,
+            unsafe_allow_html=True
         )
+
+
+
     else:
         st.warning("Nenhum dado disponível para a empresa e grupo selecionados.")
 
 
 
-    # KPI's cards
+    # Colunas para os cards ficarem lado a lado
     col1, col2, col3, col4 = st.columns(4)
     
     # Valores inteiros
@@ -123,8 +141,46 @@ if pagina == "DRE":
     with col4:
         kpi_card("Lucro Líquido", valor_formatado4, perc_lucro_liquido)
 
-   
     
+
+    # ====================================
+    # Gráficos de Linha
+    # ====================================     
+    
+    # Colunas para os gráficos ficarem lado a lado
+    col1, col2 = st.columns(2)
+
+    with col1:
+        df = get_receita_todos_os_anos(empresa, grupo)
+    
+        line_chart(
+            df=df,
+            col_x="ANO",
+            series=[{"col": "VL_CONTA", "label": "Receita Líquida"}],
+            titulo="Receita Líquida x Ano",
+            formato_y="monetario",
+        )
+
+    with col2:
+        df = get_kpis_todos_os_anos(empresa, grupo)
+
+        line_chart(
+            df=df,
+            col_x="ANO",
+            series=[
+                {"col": "MG_BRUTA", "label": "Margem Bruta"},
+                {"col": "EBITDA", "label": "EBITDA"},
+                {"col": "LUCRO_LIQ", "label": "Lucro Líquido"}
+            ],
+            titulo="KPIs percentuais x Ano",
+            formato_y="percentual",
+        )
+
+    
+    # ====================================
+    # Tabela completa DRE
+    # ====================================    
+
     df = get_dre_empresa(empresa, grupo)
 
     st.markdown(

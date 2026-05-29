@@ -137,7 +137,7 @@ def get_ebitda_card(empresa, grupo):
     COALESCE(SUM(VL_CONTA), 0) AS VL_CONTA 
     FROM dre
     WHERE 
-    (DS_CONTA LIKE "%Deprecia%" OR DS_CONTA LIKE "%Amort%" OR DS_CONTA LIKE "%Provisão%")
+    (DS_CONTA LIKE "%Deprecia%" OR DS_CONTA LIKE "%Amort%" OR DS_CONTA LIKE "%Provis%")
     AND ANO = (SELECT max_ano FROM ultimo_ano_empresa)
     AND SUBSTR(CD_CONTA, 1, 4) <= '3.04' -- somente contas de resultado operacional no filtro
     AND DENOM_CIA = '{empresa}'
@@ -174,7 +174,113 @@ def get_lucro_liquido(empresa, grupo):
     
     return 0
 
+def get_receita_todos_os_anos(empresa, grupo):
+    
+    query = f"""
+    SELECT
+    ANO,
+    VL_CONTA
+    FROM dre
+    WHERE CD_CONTA = '3.01' AND VL_CONTA > 0
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo}';
+    """
+    df = pd.read_sql(query, engine)
 
+    return df if not df.empty else pd.DataFrame(columns=["ANO", "VL_CONTA"])
+
+
+def get_kpis_todos_os_anos(empresa, grupo):
+    
+    query = f"""
+    WITH rec_liq as(
+    SELECT
+        ANO,
+        VL_CONTA AS REC_LIQ
+    FROM dre
+    WHERE CD_CONTA = '3.01'
+    AND DENOM_CIA LIKE '%BCO BRASIL S.A%'
+    AND GRUPO_DFP = 'DF Consolidado - Demonstração do Resultado'
+    ),
+    margem_bruta as (
+    SELECT
+        ANO,
+        VL_CONTA AS MG_BRUTA
+    FROM dre
+    WHERE CD_CONTA = '3.03'
+    AND DENOM_CIA LIKE '%BCO BRASIL S.A%'
+    AND GRUPO_DFP = 'DF Consolidado - Demonstração do Resultado'
+    ),
+    ebit AS (
+    SELECT ANO, EBIT
+    FROM (
+        SELECT
+            ANO,
+            VL_CONTA AS EBIT,
+            ROW_NUMBER() OVER (
+                PARTITION BY ANO
+                ORDER BY
+                    CASE
+                        WHEN DS_CONTA LIKE '%Resultado Antes do Resultado%' THEN 1
+                        WHEN DS_CONTA LIKE '%Resultado Antes dos Tributos%' THEN 2
+                        ELSE 3
+                    END
+            ) AS rn
+        FROM dre
+        WHERE 
+            (DS_CONTA LIKE '%Resultado Antes do Resultado%'
+            OR DS_CONTA LIKE '%Resultado Antes dos Tributos%')
+            AND DENOM_CIA LIKE '%BCO BRASIL S.A%'
+            AND GRUPO_DFP = 'DF Consolidado - Demonstração do Resultado'
+    )
+    WHERE rn = 1
+    ),
+    ajuste_ebitda AS (
+    SELECT
+        ANO,
+        COALESCE(SUM(VL_CONTA), 0) AS AJUSTE 
+    FROM dre
+    WHERE 
+    (DS_CONTA LIKE "%Deprecia%" OR DS_CONTA LIKE "%Amort%" OR DS_CONTA LIKE "%Provis%")
+    AND SUBSTR(CD_CONTA, 1, 4) <= '3.04' -- somente contas de resultado operacional no filtro
+    AND DENOM_CIA LIKE '%BCO BRASIL S.A%'
+    AND GRUPO_DFP = 'DF Consolidado - Demonstração do Resultado'
+    GROUP BY ANO
+    ),
+    lucro_liquido AS (
+    SELECT
+    ANO,
+    VL_CONTA AS LUCRO_LIQ
+    FROM dre
+    WHERE CD_CONTA = '3.11'
+    AND DENOM_CIA LIKE '%BCO BRASIL S.A%'
+    AND GRUPO_DFP = 'DF Consolidado - Demonstração do Resultado'
+    )
+    SELECT
+        r.ANO,
+        ROUND(
+            (CAST(m.MG_BRUTA AS REAL) / CAST(r.REC_LIQ AS REAL)) * 100,
+            1
+        ) AS MG_BRUTA,
+        ROUND(
+            ((CAST(e.EBIT AS REAL) - COALESCE(a.AJUSTE, 0)) / CAST(r.REC_LIQ AS REAL) * 100),
+            1
+        ) AS EBITDA,
+        ROUND(
+            (CAST(l.LUCRO_LIQ AS REAL) / CAST(r.REC_LIQ AS REAL)) * 100,
+            1
+        ) AS LUCRO_LIQ
+    FROM rec_liq r
+    LEFT JOIN margem_bruta m ON r.ANO = m.ANO
+    LEFT JOIN ebit e ON r.ANO = e.ANO
+    LEFT JOIN ajuste_ebitda a ON r.ANO = a.ANO
+    LEFT JOIN lucro_liquido l on r.ANO = l.ANO
+    ORDER BY r.ANO;
+    """
+    
+    df = pd.read_sql(query, engine)
+
+    return df if not df.empty else pd.DataFrame(columns=["ANO", "MG_BRUTA", "EBITDA", "LUCRO_LIQ"])
 
 
 def get_dre_empresa(empresa, grupo):
