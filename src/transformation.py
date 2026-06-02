@@ -107,7 +107,7 @@ def validar_dre(df: pd.DataFrame):
     return valid_rows, errors
     
 
- # =========================
+# =========================
 # SALVAMENTO CSV CLEAN
 # =========================
 
@@ -123,8 +123,17 @@ def salvar_dre(df: pd.DataFrame) -> None:
     )
 
 
+# =========================
+# EXCLUSÃO E LIMPEZA DE ARQUIVOS RAW
+# =========================
 
+def limpar_todos_csvs_raw():
+    '''Limpa todos os arquivos CSV da pasta raw.'''
 
+    for file in os.listdir(RAW_DIR):
+        if file.endswith('.csv'):
+            os.remove(os.path.join(RAW_DIR, file))
+            print(f"Arquivo {file} removido. Pasta raw limpa.")
 
 
 

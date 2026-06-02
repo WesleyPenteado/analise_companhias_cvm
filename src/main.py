@@ -1,5 +1,5 @@
 from ingestion import get_available_years, download_and_extract
-from transformation import unificar_bases_dre, transformar_dre, validar_dre, salvar_dre
+from transformation import unificar_bases_dre, transformar_dre, validar_dre, salvar_dre, limpar_todos_csvs_raw
 from load import load_dre_to_db
 from pathlib import Path
 
@@ -29,7 +29,11 @@ def main():
     
     print("💾 Carregando no banco...")
     load_dre_to_db(df)
-    
+
+    print("🧹 Limpando arquivos da pasta raw...")
+    limpar_todos_csvs_raw()
+
+   
     print("✅ Processamento concluído!")
 
 
