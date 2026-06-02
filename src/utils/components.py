@@ -7,22 +7,21 @@ import pandas as pd
 # ====================================
 # CARDS
 # ====================================
-def kpi_card(titulo, valor, variacao=None):
-    '''Cria um card de KPI com título, valor e variação percentual opcional.'''
+def kpi_card(titulo, valor, percentual=None):
+    '''Cria um card de KPI com título, valor e percentual de variação ou kpi opcional.'''
 
-    variacao_html = ""
+    percentual_html = ""
 
-    if variacao is not None:
-        cor = "#10B981" if variacao >= 0 else "#EF4444"
-        sinal = "+" if variacao > 0 else ""
+    if percentual is not None:
+        cor = "#10B981" if percentual >= 0 else "#EF4444"
 
-        variacao_html = f"""
+        percentual_html = f"""
         <span style="
             font-size: 14px;
             color: {cor};
             font-weight: 600;
         ">
-            {sinal}{variacao:.1f}%
+            {percentual:.1f}%
         </span>
         """
 
@@ -57,7 +56,7 @@ def kpi_card(titulo, valor, variacao=None):
                 {valor}
             </h2>
 
-            {variacao_html}
+            {percentual_html}
         </div>
     </div>
     """)
