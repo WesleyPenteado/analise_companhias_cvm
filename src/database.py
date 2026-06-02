@@ -23,6 +23,7 @@ Base = declarative_base()
 
 
 def get_db():
+    '''Função de dependência para obter uma sessão de banco de dados'''
     db = SessionLocal()
     try:
         yield db

@@ -4,6 +4,7 @@ from models import DRE_Model
 Base.metadata.create_all(bind=engine)
 
 def load_dre_to_db(df):
+    '''Carrega os dados do DataFrame para o banco de dados.'''
 
     db = SessionLocal()
 

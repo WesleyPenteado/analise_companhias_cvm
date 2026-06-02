@@ -13,6 +13,7 @@ engine = create_engine(DATABASE_URL)
 
 
 def get_empresas():
+    '''Retorna uma lista de empresas distintas presentes na tabela DRE.'''
     query = """
     SELECT DISTINCT DENOM_CIA
     FROM dre
@@ -22,6 +23,7 @@ def get_empresas():
     return pd.read_sql(query, engine)
 
 def get_grupos():
+    '''Retorna uma lista de grupos distintos presentes na tabela DRE. Grupos representam os tipos de demonstração: consolidado, individual e etc'''
     query = """
     SELECT DISTINCT GRUPO_DFP
     FROM dre
@@ -31,6 +33,7 @@ def get_grupos():
     return pd.read_sql(query, engine)
 
 def ano_mais_recente(empresa, grupo):
+    '''Retorna o ano mais recente de acordo com a empresa e grupo selecionados'''
     query = f"""
     SELECT MAX(ANO) AS max_ano
     FROM dre
@@ -47,6 +50,7 @@ def ano_mais_recente(empresa, grupo):
 
 
 def get_receita_card(empresa, grupo):
+    '''Retorna a receita líquida mais recente de acordo com a empresa e grupo selecionados'''
     
     query = f"""
     WITH ultimo_ano_empresa AS (
@@ -71,6 +75,7 @@ def get_receita_card(empresa, grupo):
     return 0
 
 def get_mg_bruta_card(empresa, grupo):
+    '''Retorna a margem bruta mais recente de acordo com a empresa e grupo selecionados'''
     query = f"""
     WITH ultimo_ano_empresa AS (
         SELECT MAX(ANO) AS max_ano
@@ -94,7 +99,7 @@ def get_mg_bruta_card(empresa, grupo):
     return 0
 
 def get_ebit_card(empresa, grupo):
-    
+    '''Retorna o EBIT mais recente de acordo com a empresa e grupo selecionados'''
     query = f"""
     WITH ultimo_ano_empresa AS (
         SELECT MAX(ANO) AS max_ano
@@ -125,7 +130,7 @@ def get_ebit_card(empresa, grupo):
     return 0
 
 def get_ebitda_card(empresa, grupo):
-    
+    '''Retorna o EBITDA mais recente de acordo com a empresa e grupo selecionados. Leva em consideração um ajuste de depreciação, amortização e provisões para chegar no valor do EBITDA'''
     query = f"""
     WITH ultimo_ano_empresa AS (
         SELECT MAX(ANO) AS max_ano
@@ -152,6 +157,7 @@ def get_ebitda_card(empresa, grupo):
 
 
 def get_lucro_liquido(empresa, grupo):
+    '''Retorna o lucro líquido mais recente de acordo com a empresa e grupo selecionados'''
     query = f"""
     WITH ultimo_ano_empresa AS (
         SELECT MAX(ANO) AS max_ano
@@ -175,6 +181,7 @@ def get_lucro_liquido(empresa, grupo):
     return 0
 
 def get_receita_todos_os_anos(empresa, grupo):
+    '''Retorna a receita líquida de todos os anos disponíveis de acordo com a empresa e grupo selecionados'''
     
     query = f"""
     SELECT
@@ -191,7 +198,7 @@ def get_receita_todos_os_anos(empresa, grupo):
 
 
 def get_kpis_todos_os_anos(empresa, grupo):
-    
+    '''Retorna a margem bruta, EBITDA e lucro líquido em percentuais de todos os anos disponíveis de acordo com a empresa e grupo selecionados'''
     query = f"""
     WITH rec_liq as(
     SELECT
@@ -284,6 +291,7 @@ def get_kpis_todos_os_anos(empresa, grupo):
 
 
 def get_dre_empresa(empresa, grupo):
+    '''Retorna a tabela de DRE contemplando todas as contas e anos disponíveis de acordo com a empresa e grupo selecionados'''
     
     query = f"""
     SELECT

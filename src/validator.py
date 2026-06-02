@@ -3,6 +3,7 @@ from schema import DRE_Schema
 
 
 def validador_df_DRE(df) -> Tuple[List[DRE_Schema], List[dict]]:
+    '''Valida o DataFrame de DRE usando o Pydantic. Retorna uma lista de linhas válidas e uma lista de erros encontrados.'''
     valid_rows = []
     errors = []
 
