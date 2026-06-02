@@ -131,15 +131,18 @@ Acesse em: [http://localhost:8501](http://localhost:8501)
 ### ✅ Implementado
 
 **DRE — Demonstração do Resultado do Exercício**
-- KPIs do ano mais recente: Receita Líquida, Margem Bruta, EBITDA e Lucro Líquido
-- Variação percentual sobre a Receita em cada KPI
-- Tabela completa da DRE formatada em R$ mil
-- Filtros por empresa e grupo (DFP/ITR)
+- Filtro por empresa e tipo de demonstração (Consolidada ou individual)
+- KPIs: Receita Líquida, Margem Bruta, EBITDA e Lucro Líquido
+- Análise de tendência para cada KPI
+- Tabela completa da DRE para análisar detalhadamente cada conta
+
+**Resultado Dashboard Streamlit**
+![alt text](img/img1.jpg)
 
 ### 🚧 Em Desenvolvimento
 
-- **Fluxo de Caixa (DFC)** — estrutura criada, relatório em construção
-- **Balanço Patrimonial (BP)** — estrutura criada, relatório em construção
+- **Análise de Fluxo de Caixa (DFC)** — estrutura criada, relatório em construção
+- **Análise de Balanço Patrimonial (BP)** — estrutura criada, relatório em construção
 
 ---
 
@@ -163,20 +166,9 @@ Arquivos utilizados: demonstrações financeiras padronizadas (DFP/ITR) no forma
 
 ---
 
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Sinta-se à vontade para abrir uma *issue* ou enviar um *pull request*.
-
-1. Fork o projeto
-2. Crie uma branch: `git checkout -b feature/minha-feature`
-3. Commit suas alterações: `git commit -m 'feat: adiciona minha feature'`
-4. Push para a branch: `git push origin feature/minha-feature`
-5. Abra um Pull Request
-
-
-
 ## 👤 Autor
 
 **Wesley Penteado**
 - GitHub: [@WesleyPenteado](https://github.com/WesleyPenteado)
+- Linkedin: [@wesleypenteadocosta](https://www.linkedin.com/in/wesleypenteadocosta/)
 - Email: wesleycosta.ne@gmail.com
