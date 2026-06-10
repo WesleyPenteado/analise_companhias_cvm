@@ -100,10 +100,15 @@ cd analise_companhias_cvm
 poetry install
 ```
 
-### 3. Ative o ambiente virtual
+### 3. Ative o ambiente virtual via comando bash
 
 ```bash
 poetry shell
+```
+
+ou
+```bash
+source .venv/Scripts/activate
 ```
 
 ### 4. Execute a ingestão de dados
