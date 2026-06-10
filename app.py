@@ -6,7 +6,8 @@ from src.utils.components import (
 )
 from src.utils.formatters import (
     formatar_brl_tabela_DRE,
-    format_brl
+    format_brl,
+    formatar_variacao_dre
 )
 from src.queries_dre import (
     get_empresas,
@@ -19,7 +20,8 @@ from src.queries_dre import (
     get_ebitda_card,
     get_lucro_liquido,
     get_receita_todos_os_anos,
-    get_kpis_todos_os_anos
+    get_kpis_todos_os_anos,
+    get_analise_horizontal_dre
 )
 
 # ====================================
@@ -172,7 +174,7 @@ if pagina == "DRE":
                 {"col": "EBITDA", "label": "EBITDA"},
                 {"col": "LUCRO_LIQ", "label": "Lucro Líquido"}
             ],
-            titulo="KPIs percentuais x Ano",
+            titulo="Evolução KPI's x Ano",
             formato_y="percentual",
         )
 
@@ -181,24 +183,31 @@ if pagina == "DRE":
     # Tabela completa DRE
     # ====================================    
 
-    df = get_dre_empresa(empresa, grupo)
+    st.subheader("📈 Análise Horizontal DRE")
+
+    df = get_analise_horizontal_dre(empresa, grupo)
 
     st.markdown(
-        """
-        <p style='text-align: right;
-        color: gray;
-        font-size: 0.85em;'>
-        Valores expressos em R$ mil
-        </p>
-        """,
-        unsafe_allow_html=True
+    """
+    <p style='text-align: right;
+    color: gray;
+    font-size: 0.85em;'>
+    Valores expressos em R$ mil
+    </p>
+    """,
+    unsafe_allow_html=True
     )
 
+    df_fmt = formatar_brl_tabela_DRE(df)
+
     st.dataframe(
-        formatar_brl_tabela_DRE(df),
+        formatar_variacao_dre(df_fmt),
         use_container_width=True,
         hide_index=True
     )
+
+
+    st.subheader("📈 Análise Vertical DRE")
 
 # ====================================
 # DFC

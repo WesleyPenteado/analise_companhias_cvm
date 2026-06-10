@@ -320,3 +320,54 @@ def get_dre_empresa(empresa, grupo):
     """
 
     return pd.read_sql(query, engine)
+
+
+def get_analise_horizontal_dre(empresa, grupo):
+    '''Retorna a tabela de análise horizontal da DRE de acordo com a empresa e grupo selecionados'''
+    query = f"""
+    WITH dados AS (
+        SELECT
+            CD_CONTA AS Conta,
+            DS_CONTA AS Descricao,
+            SUM(CASE WHEN ANO = 2021 THEN VL_CONTA ELSE 0 END) AS Ano_2021,
+            SUM(CASE WHEN ANO = 2022 THEN VL_CONTA ELSE 0 END) AS Ano_2022,
+            SUM(CASE WHEN ANO = 2023 THEN VL_CONTA ELSE 0 END) AS Ano_2023,
+            SUM(CASE WHEN ANO = 2024 THEN VL_CONTA ELSE 0 END) AS Ano_2024,
+            SUM(CASE WHEN ANO = 2025 THEN VL_CONTA ELSE 0 END) AS Ano_2025
+        FROM dre
+        WHERE
+            DENOM_CIA = '{empresa}'
+            AND VL_CONTA <> 0
+            AND GRUPO_DFP = '{grupo}'
+        GROUP BY
+            CD_CONTA,
+            DS_CONTA
+    )
+    SELECT
+        Conta,
+        Descricao,
+        Ano_2021,
+        Ano_2022,
+        ROUND(
+            (Ano_2022 - Ano_2021) * 100.0 /
+            NULLIF(Ano_2021, 0), 1
+        ) AS Var_2022,
+        Ano_2023,
+        ROUND(
+            (Ano_2023 - Ano_2022) * 100.0 /
+            NULLIF(Ano_2022, 0), 1
+        ) AS Var_2023,
+        Ano_2024,
+        ROUND(
+            (Ano_2024 - Ano_2023) * 100.0 /
+            NULLIF(Ano_2023, 0), 1
+        ) AS Var_2024,
+        Ano_2025,
+        ROUND(
+            (Ano_2025 - Ano_2024) * 100.0 /
+            NULLIF(Ano_2024, 0), 1
+        ) AS Var_2025
+    FROM dados
+    ORDER BY Conta;
+    """
+    return pd.read_sql(query, engine)

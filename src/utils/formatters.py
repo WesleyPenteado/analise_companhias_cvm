@@ -13,3 +13,19 @@ def formatar_brl_tabela_DRE(df):
                 lambda x: f"{x:_.0f}".replace(".", ",").replace("_", ".") if pd.notna(x) else ""
             )
     return df_fmt
+
+def formatar_variacao_dre(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Formata as colunas de variação percentual da DRE para percentual
+    """
+    df_fmt = df.copy()
+
+    colunas_var = [col for col in df_fmt.columns if col.startswith("Var_")]
+
+    df_fmt[colunas_var] = df_fmt[colunas_var].apply(
+        lambda col: col.map(
+            lambda x: f"{x:.1f}%" if pd.notna(x) else "—"
+        )
+    )
+
+    return df_fmt
