@@ -21,7 +21,8 @@ from src.queries_dre import (
     get_lucro_liquido,
     get_receita_todos_os_anos,
     get_kpis_todos_os_anos,
-    get_analise_horizontal_dre
+    get_analise_horizontal_dre,
+    get_analise_vertical_dre
 )
 
 # ====================================
@@ -208,6 +209,29 @@ if pagina == "DRE":
 
 
     st.subheader("📈 Análise Vertical DRE")
+
+    df = get_analise_vertical_dre(empresa, grupo)
+    
+    st.markdown(
+    """
+    <p style='text-align: right;
+    color: gray;
+    font-size: 0.85em;'>
+    Valores expressos em R$ mil
+    </p>
+    """,
+    unsafe_allow_html=True
+    )
+
+    df_fmt = formatar_brl_tabela_DRE(df)
+
+    st.dataframe(
+        formatar_variacao_dre(df_fmt),
+        use_container_width=True,
+        hide_index=True
+    )
+
+
 
 # ====================================
 # DFC

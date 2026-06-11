@@ -20,7 +20,7 @@ def formatar_variacao_dre(df: pd.DataFrame) -> pd.DataFrame:
     """
     df_fmt = df.copy()
 
-    colunas_var = [col for col in df_fmt.columns if col.startswith("Var_")]
+    colunas_var = [col for col in df_fmt.columns if col.startswith(("Var_", "AH_", "AV_"))]
 
     df_fmt[colunas_var] = df_fmt[colunas_var].apply(
         lambda col: col.map(
