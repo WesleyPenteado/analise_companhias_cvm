@@ -54,27 +54,26 @@ Gerenciador de pacotes: **Poetry**
 analise_companhias_cvm/
 │
 ├── src/
-│   ├── ingestion/          # Download dos CSVs da CVM
-│   ├── schema/             # Definição dos schemas
-│   ├── validator/          # Validação com Pydantic
-│   ├── transformation/     # Limpeza e transformação dos dados
-│   ├── database/           # Configuração do banco SQLite
-│   ├── models/             # Modelos de tabelas (SQLAlchemy)
-│   ├── load/               # Carga dos dados no banco
-│   ├── queries_dre.py      # Queries da DRE
+│   ├── ingestion/              # Download dos CSVs da CVM
+│   ├── schema/                 # Definição dos schemas
+│   ├── validator/              # Validação com Pydantic
+│   ├── transformation_dre/     # Limpeza e transformação dos dados
+│   ├── database/               # Configuração do banco SQLite
+│   ├── models/                 # Modelos de tabelas (SQLAlchemy)
+│   ├── load/                   # Carga dos dados no banco
+│   ├── queries_dre.py          # Queries da DRE
 │   └── utils/
-│       ├── components.py   # Componentes reutilizáveis (cards, gráficos)
-│       └── formatters.py   # Formatadores de valores (BRL, %)
+│       ├── components.py       # Componentes reutilizáveis (cards, gráficos)
+│       └── formatters.py       # Formatadores de valores (BRL, %)
 │
 ├── data/
-│   ├── raw/                # CSVs baixados da CVM (gerado automaticamente)
-│   └── clean/              # Dados após transformação (gerado automaticamente)
+│   ├── raw/                    # CSVs baixados da CVM (gerado automaticamente)
+│   └── clean/                  # Dados após transformação (gerado automaticamente)
 │
-├── app.py                  # Ponto de entrada do Streamlit
-├── pyproject.toml          # Dependências e configuração do Poetry
-├── poetry.lock             # Lock file das dependências
-├── .python-version         # Versão do Python (3.12.1)
-├── prd.md                  # Product Requirement Document
+├── app.py                      # Ponto de entrada do Streamlit
+├── pyproject.toml              # Dependências e configuração do Poetry
+├── poetry.lock                 # Lock file das dependências
+├── .python-version             # Versão do Python (3.12.1)
 └── .gitignore
 ```
 
