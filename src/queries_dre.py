@@ -206,8 +206,8 @@ def get_kpis_todos_os_anos(empresa, grupo):
         VL_CONTA AS REC_LIQ
     FROM dre
     WHERE CD_CONTA = '3.01'
-    AND DENOM_CIA LIKE '%BCO BRASIL S.A%'
-    AND GRUPO_DFP = 'DF Consolidado - Demonstração do Resultado'
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo}'
     ),
     margem_bruta as (
     SELECT
@@ -215,8 +215,8 @@ def get_kpis_todos_os_anos(empresa, grupo):
         VL_CONTA AS MG_BRUTA
     FROM dre
     WHERE CD_CONTA = '3.03'
-    AND DENOM_CIA LIKE '%BCO BRASIL S.A%'
-    AND GRUPO_DFP = 'DF Consolidado - Demonstração do Resultado'
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo}'
     ),
     ebit AS (
     SELECT ANO, EBIT
@@ -237,8 +237,8 @@ def get_kpis_todos_os_anos(empresa, grupo):
         WHERE 
             (DS_CONTA LIKE '%Resultado Antes do Resultado%'
             OR DS_CONTA LIKE '%Resultado Antes dos Tributos%')
-            AND DENOM_CIA LIKE '%BCO BRASIL S.A%'
-            AND GRUPO_DFP = 'DF Consolidado - Demonstração do Resultado'
+            AND DENOM_CIA = '{empresa}'
+            AND GRUPO_DFP = '{grupo}'
     )
     WHERE rn = 1
     ),
@@ -250,8 +250,8 @@ def get_kpis_todos_os_anos(empresa, grupo):
     WHERE 
     (DS_CONTA LIKE "%Deprecia%" OR DS_CONTA LIKE "%Amort%" OR DS_CONTA LIKE "%Provis%")
     AND SUBSTR(CD_CONTA, 1, 4) <= '3.04' -- somente contas de resultado operacional no filtro
-    AND DENOM_CIA LIKE '%BCO BRASIL S.A%'
-    AND GRUPO_DFP = 'DF Consolidado - Demonstração do Resultado'
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo}'
     GROUP BY ANO
     ),
     lucro_liquido AS (
@@ -260,8 +260,8 @@ def get_kpis_todos_os_anos(empresa, grupo):
     VL_CONTA AS LUCRO_LIQ
     FROM dre
     WHERE CD_CONTA = '3.11'
-    AND DENOM_CIA LIKE '%BCO BRASIL S.A%'
-    AND GRUPO_DFP = 'DF Consolidado - Demonstração do Resultado'
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo}'
     )
     SELECT
         r.ANO,
