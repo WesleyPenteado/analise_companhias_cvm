@@ -1,5 +1,5 @@
-from database import SessionLocal, engine, Base
-from models import DRE_Model
+from src.database import SessionLocal, engine, Base
+from src.models import DRE_Model
 
 Base.metadata.create_all(bind=engine)
 

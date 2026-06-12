@@ -1,6 +1,6 @@
-from ingestion import get_available_years, download_and_extract
-from transformation import unificar_bases_dre, transformar_dre, validar_dre, salvar_dre, limpar_todos_csvs_raw
-from load import load_dre_to_db
+from src.ingestion import get_available_years, download_and_extract
+from src.transformation_dre import unificar_bases_dre, transformar_dre, validar_dre, salvar_dre, limpar_todos_csvs_raw
+from src.load import load_dre_to_db
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent

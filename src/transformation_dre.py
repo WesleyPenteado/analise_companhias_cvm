@@ -1,8 +1,7 @@
 import pandas as pd
 from pathlib import Path
 import os
-import openpyxl
-from validator import validador_df_DRE
+from src.validator import validador_df_DRE
 
 # Diretórios para os arquivos
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -75,7 +74,7 @@ def transformar_dre(df: pd.DataFrame) -> pd.DataFrame:
 
     duplicados = df.duplicated(subset=colunas_chave, keep=False)
     if duplicados.any():
-        print(f"[WARN] {duplicados.sum()} linhas duplicadas encontradas — mantendo primeira ocorrência.")
+        print(f"[WARN] {duplicados.sum()} linhas duplicadas encontradas no arquivo DRE — mantendo primeira ocorrência.")
 
     df = df.drop_duplicates(subset=colunas_chave, keep='first')
 

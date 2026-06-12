@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from schema import DRE_Schema
+from src.schema import DRE_Schema
 
 
 def validador_df_DRE(df) -> Tuple[List[DRE_Schema], List[dict]]:
