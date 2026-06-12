@@ -1,3 +1,4 @@
+from sqlalchemy.dialects.sqlite import insert
 from src.database import SessionLocal, engine, Base
 from src.models import DRE_Model
 

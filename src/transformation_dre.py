@@ -1,7 +1,10 @@
 import pandas as pd
 from pathlib import Path
 import os
+import time
+import sqlite3
 from src.validator import validador_df_DRE
+
 
 # Diretórios para os arquivos
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -123,7 +126,7 @@ def salvar_dre(df: pd.DataFrame) -> None:
 
 
 # =========================
-# EXCLUSÃO E LIMPEZA DE ARQUIVOS RAW
+# EXCLUSÃO E LIMPEZA DE ARQUIVOS RAW, CLEAN E BANCO DE DADOS
 # =========================
 
 def limpar_todos_csvs_raw():
@@ -133,6 +136,8 @@ def limpar_todos_csvs_raw():
         if file.endswith('.csv'):
             os.remove(os.path.join(RAW_DIR, file))
             print(f"Arquivo {file} removido. Pasta raw limpa.")
+
+
 
 
 
