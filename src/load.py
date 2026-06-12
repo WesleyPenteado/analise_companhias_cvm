@@ -10,6 +10,9 @@ def load_dre_to_db(df):
     db = SessionLocal()
 
     try:
+        db.query(DRE_Model).delete()
+        db.commit()
+
         data = df.to_dict(orient="records")
 
         objects = [DRE_Model(**row) for row in data]
