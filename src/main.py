@@ -1,6 +1,7 @@
 from src.ingestion import get_available_years, download_and_extract
 from src.transformation_dre import unificar_bases_dre, transformar_dre, validar_dre, salvar_dre, limpar_todos_csvs_raw
-from src.load import load_dre_to_db
+from src.transformation_dfc import unificar_bases_dfc, transformar_dfc, validar_dfc, salvar_dfc
+from src.load import load_dre_to_db, load_dfc_to_db
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,15 +21,27 @@ def main():
     print("✅ Download e extração concluídos!")
 
     print("Iniciando processamento dos dados...")
-    df = unificar_bases_dre(RAW_DIR)
-    df = transformar_dre(df)
-    valid_rows, errors = validar_dre(df)
+    
+    # Processando DRE
+    df_dre = unificar_bases_dre(RAW_DIR)
+    df_dre = transformar_dre(df_dre)
+    valid_rows, errors = validar_dre(df_dre)
 
     if not errors:
-        salvar_dre(df)
+        salvar_dre(df_dre)
+
+    # Processando DFC
+    df_dfc = unificar_bases_dfc(RAW_DIR)
+    df_dfc = transformar_dfc(df_dfc)
+    valid_rows_dfc, errors_dfc = validar_dfc(df_dfc)
+
+    if not errors_dfc:
+        salvar_dfc(df_dfc)
+    
     
     print("💾 Carregando no banco...")
-    load_dre_to_db(df)
+    load_dre_to_db(df_dre)
+    load_dfc_to_db(df_dfc)
 
     print("🧹 Limpando arquivos da pasta raw...")
     limpar_todos_csvs_raw()

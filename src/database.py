@@ -3,28 +3,56 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from pathlib import Path
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent  # sobe de src/
-DB_PATH = BASE_DIR / "data" / "db" / "dre.db"
+BASE_DIR = Path(__file__).resolve().parent.parent  # sobe de src
+DB_DIR = BASE_DIR / "data" / "db" 
 
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
+# __ DRE _____________________________________________
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False}  # necessário para SQLite
+DRE_URL = f"sqlite:///{DB_DIR / 'dre.db'}"
+
+dre_engine = create_engine(
+    DRE_URL,
+    connect_args={"check_same_thread": False}
 )
 
-SessionLocal = sessionmaker(
+dre_session = sessionmaker(
     autocommit=False,
     autoflush=False,
-    bind=engine
+    bind=dre_engine
+)
+dre_base = declarative_base()
+
+
+# __ DFC _____________________________________________
+
+DFC_URL = f"sqlite:///{DB_DIR / 'dfc.db'}"
+
+dfc_engine = create_engine(
+    DFC_URL, 
+    connect_args={"check_same_thread": False}
 )
 
-Base = declarative_base()
+dfc_session = sessionmaker(
+    autocommit=False, 
+    autoflush=False, 
+    bind=dfc_engine
+)
+dfc_base = declarative_base()
 
 
-def get_db():
-    '''Função de dependência para obter uma sessão de banco de dados'''
-    db = SessionLocal()
+# __ Dependências FastAPI ____________________________
+
+def get__dre_db():
+    '''Sessão para o banco da DRE.'''
+    db = dre_session()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def get__dfc_db():
+    '''Sessão para o banco da DFC.'''
+    db = dfc_session()
     try:
         yield db
     finally:
