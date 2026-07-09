@@ -25,6 +25,10 @@ from src.queries_dre import (
     get_analise_vertical_dre
 )
 
+from src.queries_dfc import (
+    get_grupos_dfc
+)
+
 # ====================================
 # CONFIG
 # ====================================
@@ -48,10 +52,7 @@ empresa = st.sidebar.selectbox(
     empresas_df["DENOM_CIA"]
 )
 
-grupo = st.sidebar.selectbox(
-    "Grupo",
-    grupos_df["GRUPO_DFP"]
-)
+
 
 st.sidebar.markdown("---")
 
@@ -73,6 +74,11 @@ pagina = st.sidebar.radio(
 if pagina == "DRE":
 
     st.title("📊 DRE - Demonstração do Resultado do Exercício")
+
+    grupo = st.selectbox(
+        "Selecione o grupo da DRE (Consolidado ou Individual)",
+        grupos_df["GRUPO_DFP"]
+    )
 
 
     # ====================================
@@ -102,12 +108,11 @@ if pagina == "DRE":
             unsafe_allow_html=True
         )
 
-
-
     else:
         st.warning("Nenhum dado disponível para a empresa e grupo selecionados.")
 
 
+    
 
     # Colunas para os cards ficarem lado a lado
     col1, col2, col3, col4 = st.columns(4)
@@ -252,8 +257,12 @@ elif pagina == "Fluxo de Caixa":
         unsafe_allow_html=True
     )
 
-    st.write(f"Empresa selecionada: {empresa}")
-    st.write(f"Grupo selecionado: {grupo}")
+    grupos_df = get_grupos_dfc()
+
+    grupo_dfc = st.selectbox(
+        "Grupo e método do fluxo de caixa",
+        grupos_df["GRUPO_DFP"]
+    )
 
 # ====================================
 # BP
