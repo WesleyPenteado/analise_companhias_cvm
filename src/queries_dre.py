@@ -22,7 +22,7 @@ def get_empresas():
 
     return pd.read_sql(query, engine)
 
-def get_grupos():
+def get_grupos_dre():
     '''Retorna uma lista de grupos distintos presentes na tabela DRE. Grupos representam os tipos de demonstração: consolidado, individual e etc'''
     query = """
     SELECT DISTINCT GRUPO_DFP

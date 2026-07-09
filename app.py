@@ -11,7 +11,7 @@ from src.utils.formatters import (
 )
 from src.queries_dre import (
     get_empresas,
-    get_grupos,
+    get_grupos_dre,
     get_dre_empresa,
     get_receita_card,
     ano_mais_recente,
@@ -26,7 +26,8 @@ from src.queries_dre import (
 )
 
 from src.queries_dfc import (
-    get_grupos_dfc
+    get_grupos_dfc,
+    ano_mais_recente_dfc
 )
 
 # ====================================
@@ -45,10 +46,10 @@ st.set_page_config(
 st.sidebar.title("📁 Navegação")
 
 empresas_df = get_empresas()
-grupos_df = get_grupos()
+grupos_df = get_grupos_dre()
 
 empresa = st.sidebar.selectbox(
-    "Empresa",
+    "Escolha a empresa",
     empresas_df["DENOM_CIA"]
 )
 
@@ -75,8 +76,8 @@ if pagina == "DRE":
 
     st.title("📊 DRE - Demonstração do Resultado do Exercício")
 
-    grupo = st.selectbox(
-        "Selecione o grupo da DRE (Consolidado ou Individual)",
+    grupo_dre = st.selectbox(
+        "Selecione o grupo da DRE",
         grupos_df["GRUPO_DFP"]
     )
 
@@ -85,20 +86,20 @@ if pagina == "DRE":
     # CARDS TOPO PÁGINA
     # ====================================  
     
-    ultimo_ano = ano_mais_recente(empresa, grupo)
+    ultimo_ano_dre = ano_mais_recente(empresa, grupo_dre)
 
-    if ultimo_ano:
+    if ultimo_ano_dre:
         st.markdown(
             f"""
             <ul style='
                 color: gray;
                 font-size: 0.85em;
                 padding-left: 18px;
-                margin-top: 0;
+                margin-top: 25px;
                 margin-bottom: 0;
             '>
                 <li style='margin-bottom: 2px;'>
-                    KPI's referentes ao ano mais recente disponível: {ultimo_ano}.
+                    KPI's referentes ao ano mais recente disponível: {ultimo_ano_dre}.
                 </li>
                 <li>
                     Valores expressos em R$ mil
@@ -118,12 +119,12 @@ if pagina == "DRE":
     col1, col2, col3, col4 = st.columns(4)
     
     # Valores inteiros
-    v_receita = get_receita_card(empresa, grupo)
-    v_mg_bruta = get_mg_bruta_card(empresa, grupo)
-    v_ebit = get_ebit_card(empresa, grupo)
-    v_ebitda = get_ebitda_card(empresa, grupo)
+    v_receita = get_receita_card(empresa, grupo_dre)
+    v_mg_bruta = get_mg_bruta_card(empresa, grupo_dre)
+    v_ebit = get_ebit_card(empresa, grupo_dre)
+    v_ebitda = get_ebitda_card(empresa, grupo_dre)
     v_ebitda = v_ebit + v_ebitda
-    v_lucro_liquido = get_lucro_liquido(empresa, grupo)
+    v_lucro_liquido = get_lucro_liquido(empresa, grupo_dre)
 
     # Formata o número no padrão brasileiro
     valor_formatado1 = format_brl(v_receita)
@@ -159,7 +160,7 @@ if pagina == "DRE":
     col1, col2 = st.columns(2)
 
     with col1:
-        df = get_receita_todos_os_anos(empresa, grupo)
+        df = get_receita_todos_os_anos(empresa, grupo_dre)
     
         line_chart(
             df=df,
@@ -170,7 +171,7 @@ if pagina == "DRE":
         )
 
     with col2:
-        df = get_kpis_todos_os_anos(empresa, grupo)
+        df = get_kpis_todos_os_anos(empresa, grupo_dre)
 
         line_chart(
             df=df,
@@ -191,7 +192,7 @@ if pagina == "DRE":
 
     st.subheader("📈 Análise Horizontal DRE")
 
-    df = get_analise_horizontal_dre(empresa, grupo)
+    df = get_analise_horizontal_dre(empresa, grupo_dre)
 
     st.markdown(
     """
@@ -215,7 +216,7 @@ if pagina == "DRE":
 
     st.subheader("📈 Análise Vertical DRE")
 
-    df = get_analise_vertical_dre(empresa, grupo)
+    df = get_analise_vertical_dre(empresa, grupo_dre)
     
     st.markdown(
     """
@@ -264,6 +265,46 @@ elif pagina == "Fluxo de Caixa":
         grupos_df["GRUPO_DFP"]
     )
 
+    # ====================================
+    # CARDS TOPO PÁGINA
+    # ====================================  
+    
+    ultimo_ano_dfc = ano_mais_recente_dfc(empresa, grupo_dfc)
+
+    if ultimo_ano_dfc:
+        st.markdown(
+            f"""
+            <ul style='
+                color: gray;
+                font-size: 0.85em;
+                padding-left: 18px;
+                margin-top: 25px;
+                margin-bottom: 0;
+            '>
+                <li style='margin-bottom: 2px;'>
+                    KPI's referentes ao ano mais recente disponível: {ultimo_ano_dfc}.
+                </li>
+                <li>
+                    Valores expressos em R$ mil
+                </li>
+            </ul>
+            """,
+            unsafe_allow_html=True
+        )
+
+    else:
+        st.warning("Nenhum dado disponível para a empresa e grupo selecionados.")
+
+
+    # Colunas para os cards ficarem lado a lado
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+
+
+
+
+
+
+
 # ====================================
 # BP
 # ====================================
@@ -284,4 +325,4 @@ elif pagina == "Balanço Patrimonial":
     )
 
     st.write(f"Empresa selecionada: {empresa}")
-    st.write(f"Grupo selecionado: {grupo}")
+    st.write(f"Grupo selecionado: {grupo_dre}")

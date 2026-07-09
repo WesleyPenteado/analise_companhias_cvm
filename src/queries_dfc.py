@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from pathlib import Path
 
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent  # sobe de src/
 DB_PATH = BASE_DIR / "data" / "db" / "dfc.db"
 
@@ -22,3 +23,17 @@ def get_grupos_dfc():
 
     return pd.read_sql(query, engine)
 
+def ano_mais_recente_dfc(empresa, grupo):
+    '''Retorna o ano mais recente de acordo com a empresa e grupo selecionados'''
+    query = f"""
+    SELECT MAX(ANO) AS max_ano
+    FROM dfc
+    WHERE DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo}'
+    """
+    df = pd.read_sql(query, engine)
+
+    if df.empty or df.iloc[0]["max_ano"] is None:
+        return None
+    
+    return int(df.iloc[0]["max_ano"])
