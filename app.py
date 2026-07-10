@@ -27,7 +27,8 @@ from src.queries_dre import (
 
 from src.queries_dfc import (
     get_grupos_dfc,
-    ano_mais_recente_dfc
+    ano_mais_recente_dfc,
+    var_liquida_caixa
 )
 
 # ====================================
@@ -298,6 +299,25 @@ elif pagina == "Fluxo de Caixa":
 
     # Colunas para os cards ficarem lado a lado
     col1, col2, col3, col4, col5, col6 = st.columns(6)
+
+        # Valores inteiros
+    v_var_liquida_caixa = var_liquida_caixa(empresa, grupo_dfc)
+
+
+    # Formata o número no padrão brasileiro
+    valor_formatado1 = format_brl(v_var_liquida_caixa)
+
+
+    # KPI's percentuais
+    # perc_mg_bruta = (v_mg_bruta / v_receita) * 100 if v_receita else 0
+    # perc_ebitda = (v_ebitda / v_receita) * 100 if v_receita else 0
+    # perc_lucro_liquido = (v_lucro_liquido / v_receita) * 100 if v_receita else 0
+
+    
+    with col1:
+        kpi_card("Variação de Caixa", valor_formatado1)
+
+
 
 
 
