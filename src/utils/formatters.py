@@ -1,6 +1,8 @@
 import pandas as pd
 
 def format_brl(valor):
+    if valor is None:
+        return "—"
     return f"R$ {valor:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
