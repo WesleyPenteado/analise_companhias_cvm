@@ -13,11 +13,12 @@ DATABASE_URL = f"sqlite:///{DB_PATH}"
 engine = create_engine(DATABASE_URL)
 
 
-def get_grupos_dfc():
+def get_grupos_dfc(empresa):
     '''Retorna uma lista de grupos distintos presentes na tabela DFC. Grupos representam os tipos de demonstração: consolidado, individual e o método da análise (direta ou indireta)'''
-    query = """
+    query = f"""
     SELECT DISTINCT GRUPO_DFP
     FROM dfc
+    WHERE DENOM_CIA = '{empresa}'
     ORDER BY GRUPO_DFP
     """
 

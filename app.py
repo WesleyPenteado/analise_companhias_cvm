@@ -259,7 +259,7 @@ elif pagina == "Fluxo de Caixa":
         unsafe_allow_html=True
     )
 
-    grupos_df = get_grupos_dfc()
+    grupos_df = get_grupos_dfc(empresa)
 
     grupo_dfc = st.selectbox(
         "Grupo e método do fluxo de caixa",
