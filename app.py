@@ -368,5 +368,3 @@ elif pagina == "Balanço Patrimonial":
     unsafe_allow_html=True
     )
 
-    st.write(f"Empresa selecionada: {empresa}")
-    st.write(f"Grupo selecionado: {grupo_dre}")
