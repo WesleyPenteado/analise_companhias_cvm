@@ -28,7 +28,12 @@ from src.queries_dre import (
 from src.queries_dfc import (
     get_grupos_dfc,
     ano_mais_recente_dfc,
-    var_liquida_caixa
+    var_liquida_caixa,
+    caixa_operacional,
+    caixa_investimento,
+    caixa_financiamento,
+    var_cambial_equiv,
+    valor_capex
 )
 
 # ====================================
@@ -302,11 +307,20 @@ elif pagina == "Fluxo de Caixa":
 
         # Valores inteiros
     v_var_liquida_caixa = var_liquida_caixa(empresa, grupo_dfc)
+    v_caixa_operacional = caixa_operacional(empresa, grupo_dfc)
+    v_caixa_investimento = caixa_investimento(empresa, grupo_dfc)
+    v_caixa_financiamento = caixa_financiamento(empresa, grupo_dfc)
+    v_var_cambial_equiv = var_cambial_equiv(empresa, grupo_dfc)
+    v_fluxo_caixa_livre = v_caixa_operacional - (valor_capex(empresa, grupo_dfc)*-1)
 
 
     # Formata o número no padrão brasileiro
     valor_formatado1 = format_brl(v_var_liquida_caixa)
-
+    valor_formatado2 = format_brl(v_caixa_operacional)
+    valor_formatado3 = format_brl(v_caixa_investimento)
+    valor_formatado4 = format_brl(v_caixa_financiamento)
+    valor_formatado5 = format_brl(v_var_cambial_equiv)
+    valor_formatado6 = format_brl(v_fluxo_caixa_livre)
 
     # KPI's percentuais
     # perc_mg_bruta = (v_mg_bruta / v_receita) * 100 if v_receita else 0
@@ -316,6 +330,16 @@ elif pagina == "Fluxo de Caixa":
     
     with col1:
         kpi_card("Variação de Caixa", valor_formatado1)
+    with col2:
+        kpi_card("Operacional", valor_formatado2)
+    with col3:
+        kpi_card("Investimento", valor_formatado3)
+    with col4:
+        kpi_card("Financiamento", valor_formatado4)
+    with col5:
+        kpi_card("Variação Cambial", valor_formatado5)
+    with col6:
+        kpi_card("Cx Livre (Op - Capex)", valor_formatado6)
 
 
 
