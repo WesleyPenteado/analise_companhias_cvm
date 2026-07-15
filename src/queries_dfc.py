@@ -181,3 +181,25 @@ def valor_capex(empresa, grupo_dfc):
         return None
     
     return float(df.iloc[0]["CAPEX"])
+
+
+def get_kpis_dfc_todos_os_anos(empresa, grupo_dfc):
+    '''Retorna KPI's de caixa (Operacional, investimento, financiamento, variação cambial e equivalentes) e variação líquida de caixa para todos os anos'''
+    query = f"""
+    SELECT CD_CONTA, ANO, VL_CONTA
+    FROM dfc
+    WHERE DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo_dfc}'
+    AND
+    (
+        CD_CONTA = '6.01'
+        OR CD_CONTA = '6.02'
+        OR CD_CONTA = '6.03'
+        OR CD_CONTA = '6.04'
+        OR CD_CONTA = '6.05'
+    )
+    ORDER BY CD_CONTA,ANO
+    """
+    df = pd.read_sql(query, engine)
+
+    return df if not df.empty else pd.DataFrame(columns=["CD_CONTA", "ANO", "VL_CONTA"])

@@ -33,7 +33,8 @@ from src.queries_dfc import (
     caixa_investimento,
     caixa_financiamento,
     var_cambial_equiv,
-    valor_capex
+    valor_capex,
+    get_kpis_dfc_todos_os_anos
 )
 
 # ====================================
@@ -341,7 +342,36 @@ elif pagina == "Fluxo de Caixa":
     with col6:
         kpi_card("Cx Livre (Op - Capex)", valor_formatado6)
 
+    # ====================================
+    # Gráficos de Linha
+    # ====================================     
+    
+    # Colunas para os gráficos ficarem lado a lado
 
+    df = get_kpis_dfc_todos_os_anos(empresa, grupo_dfc)
+
+    df_plot = (
+        df.pivot(
+            index="ANO",
+            columns="CD_CONTA",
+            values="VL_CONTA"
+        )
+        .reset_index()
+    )
+
+    line_chart(
+        df=df_plot,
+        col_x="ANO",
+        series=[
+            {"col": "6.01", "label": "Cx Operacional"},
+            {"col": "6.02", "label": "Cx Investimento"},
+            {"col": "6.03", "label": "Cx Financiamento"},
+            {"col": "6.04", "label": "Var Cambial"},
+            {"col": "6.05", "label": "Var Liq."}
+        ],
+        titulo="Evolução de Caixa x Ano",
+        formato_y="numero",
+    )
 
 
 
