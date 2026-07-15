@@ -68,7 +68,13 @@ def kpi_card(titulo, valor, percentual=None):
 
 
 # Paleta de azuis alinhada com o visual dos cards
-_LINE_COLORS = ["#1D4ED8", "#60A5FA", "#93C5FD"]
+_LINE_COLORS = [
+    "#1D4ED8",  # Blue 700
+    "#2563EB",  # Blue 600
+    "#3B82F6",  # Blue 500
+    "#60A5FA",  # Blue 400
+    "#93C5FD",  # Blue 300
+]
 
 def line_chart(
     df: pd.DataFrame,
@@ -79,7 +85,7 @@ def line_chart(
     altura: int = 360,
 ):
     """
-    Gráfico de linha reutilizável com até 3 séries.
+    Gráfico de linha reutilizável com até 5 séries.
 
     Parâmetros
     ----------
@@ -94,8 +100,8 @@ def line_chart(
     """
 
     # --- Validação ---------------------------------------------------------
-    if len(series) > 3:
-        raise ValueError("A função suporta no máximo 3 séries.")
+    if len(series) > 5:
+        raise ValueError("A função suporta no máximo 5 séries.")
 
     # --- Formatação do eixo Y ----------------------------------------------
     _formatos = {
