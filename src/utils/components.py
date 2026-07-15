@@ -69,11 +69,11 @@ def kpi_card(titulo, valor, percentual=None):
 
 # Paleta de azuis alinhada com o visual dos cards
 _LINE_COLORS = [
-    "#1D4ED8",  # Blue 700
-    "#2563EB",  # Blue 600
-    "#3B82F6",  # Blue 500
-    "#60A5FA",  # Blue 400
-    "#93C5FD",  # Blue 300
+    "#636EFA",
+    "#EF553B",
+    "#00CC96",
+    "#AB63FA",
+    "#FFA15A",
 ]
 
 def line_chart(
