@@ -50,7 +50,7 @@ st.set_page_config(
 # SIDEBAR
 # ====================================
 
-st.sidebar.title("📁 Navegação")
+st.sidebar.title("Análise das Demonstrações Financeiras")
 
 empresas_df = get_empresas()
 grupos_df = get_grupos_dre()
@@ -65,7 +65,7 @@ empresa = st.sidebar.selectbox(
 st.sidebar.markdown("---")
 
 pagina = st.sidebar.radio(
-    "Selecione a análise:",
+    "Selecione a demonstração:",
     [
         "DRE",
         "Fluxo de Caixa",
