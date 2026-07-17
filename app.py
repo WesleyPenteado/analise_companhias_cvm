@@ -5,9 +5,9 @@ from src.utils.components import (
     line_chart
 )
 from src.utils.formatters import (
-    formatar_brl_tabela_DRE,
+    formatar_brl_tabela,
     format_brl,
-    formatar_variacao_dre
+    formatar_variacao
 )
 from src.queries_dre import (
     get_empresas,
@@ -34,7 +34,8 @@ from src.queries_dfc import (
     caixa_financiamento,
     var_cambial_equiv,
     valor_capex,
-    get_kpis_dfc_todos_os_anos
+    get_kpis_dfc_todos_os_anos,
+    get_analise_horizontal_dfc
 )
 
 # ====================================
@@ -212,10 +213,10 @@ if pagina == "DRE":
     unsafe_allow_html=True
     )
 
-    df_fmt = formatar_brl_tabela_DRE(df)
+    df_fmt = formatar_brl_tabela(df)
 
     st.dataframe(
-        formatar_variacao_dre(df_fmt),
+        formatar_variacao(df_fmt),
         use_container_width=True,
         hide_index=True
     )
@@ -236,10 +237,10 @@ if pagina == "DRE":
     unsafe_allow_html=True
     )
 
-    df_fmt = formatar_brl_tabela_DRE(df)
+    df_fmt = formatar_brl_tabela(df)
 
     st.dataframe(
-        formatar_variacao_dre(df_fmt),
+        formatar_variacao(df_fmt),
         use_container_width=True,
         hide_index=True
     )
@@ -373,9 +374,32 @@ elif pagina == "Fluxo de Caixa":
         formato_y="numero",
     )
 
+    # ====================================
+    # Tabela completa DRE
+    # ====================================    
 
+    st.subheader("📈 Análise Horizontal DFC")
 
+    df = get_analise_horizontal_dfc(empresa, grupo_dfc)
 
+    st.markdown(
+    """
+    <p style='text-align: right;
+    color: gray;
+    font-size: 0.85em;'>
+    Valores expressos em R$ mil
+    </p>
+    """,
+    unsafe_allow_html=True
+    )
+
+    df_fmt = formatar_brl_tabela(df)
+
+    st.dataframe(
+        formatar_variacao(df_fmt),
+        use_container_width=True,
+        hide_index=True
+    )
 
 
 
