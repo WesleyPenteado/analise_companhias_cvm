@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date, Numeric
 from sqlalchemy.orm import declarative_base
-from src.database import dre_base, dfc_base 
+from src.database import dre_base, dfc_base, bp_base
 
 
 class DRE_Model(dre_base):
