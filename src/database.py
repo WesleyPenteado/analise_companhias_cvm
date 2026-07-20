@@ -40,6 +40,23 @@ dfc_session = sessionmaker(
 dfc_base = declarative_base()
 
 
+# __ BP (Balanço Patrimonial) _____________________________________________
+
+BP_URL = f"sqlite:///{DB_DIR / 'bp.db'}"
+
+bp_engine = create_engine(
+    BP_URL, 
+    connect_args={"check_same_thread": False}
+)
+
+bp_session = sessionmaker(
+    autocommit=False, 
+    autoflush=False, 
+    bind=bp_engine
+)
+bp_base = declarative_base()
+
+
 # __ Dependências FastAPI ____________________________
 
 def get__dre_db():
@@ -53,6 +70,14 @@ def get__dre_db():
 def get__dfc_db():
     '''Sessão para o banco da DFC.'''
     db = dfc_session()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def get__bp_db():
+    '''Sessão para o banco da BP.'''
+    db = bp_session()
     try:
         yield db
     finally:
