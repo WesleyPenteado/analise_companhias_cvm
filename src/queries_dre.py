@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # sobe de src/
-DB_PATH = BASE_DIR / "data" / "db" / "dre.db"
+DB_PATH = BASE_DIR / "data" / "db" / "cvm.db"
 
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 

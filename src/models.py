@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, Date, Numeric
 from sqlalchemy.orm import declarative_base
-from src.database import dre_base, dfc_base, bp_base
+from src.database import cvm_base
 
 
-class DRE_Model(dre_base):
+class DRE_Model(cvm_base):
     __tablename__ = "dre"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -25,7 +25,7 @@ class DRE_Model(dre_base):
     ST_CONTA_FIXA = Column(String(1), nullable=False)  # "S" ou "N"
     ANO = Column(Integer, nullable=True)
 
-class DFC_Model(dfc_base):
+class DFC_Model(cvm_base):
     __tablename__ = "dfc"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -47,7 +47,7 @@ class DFC_Model(dfc_base):
     ST_CONTA_FIXA = Column(String(1), nullable=False)  # "S" ou "N"
     ANO = Column(Integer, nullable=True)
 
-class BP_Model(bp_base):
+class BP_Model(cvm_base):
     __tablename__ = "bp"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

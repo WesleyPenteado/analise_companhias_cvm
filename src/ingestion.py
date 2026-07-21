@@ -49,7 +49,7 @@ def get_available_years():
 def download_and_extract(ano: int, pasta_destino: str):
     '''Baixa e extrai o arquivo ZIP de todos os anos disponíveis para a pasta de destino data/raw.'''
     url = f"https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_{ano}.zip"
-    tipos = ["DRE", "DFC"] # BPA, BPP, DFC, DRE projeto final conterá estes arquivos
+    tipos = ["DRE", "DFC", "BPA", "BPP"] # BPA, BPP, DFC, DRE projeto final conterá estes arquivos
 
     
     print(f"Baixando arquivos do ano {ano}...")
