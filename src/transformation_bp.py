@@ -68,6 +68,9 @@ def transformar_bp(df: pd.DataFrame) -> pd.DataFrame:
         None
     )
 
+    # mantém somente a parte do grupo antes do hífen (DF Consolidado ou Individual)
+    df['GRUPO_DFP'] = df['GRUPO_DFP'].str.split(' - ').str[0]
+
     # filtrar somente última versão
     df = df[df['ORDEM_EXERC'] == 'ÚLTIMO']
 
