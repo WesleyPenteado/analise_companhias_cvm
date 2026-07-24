@@ -38,6 +38,10 @@ from src.queries_dfc import (
     get_analise_horizontal_dfc
 )
 
+from src.queries_bp import (
+    get_grupos_bp
+)
+
 # ====================================
 # CONFIG
 # ====================================
@@ -375,7 +379,7 @@ elif pagina == "Fluxo de Caixa":
     )
 
     # ====================================
-    # Tabela completa DRE
+    # Tabela completa DFC
     # ====================================    
 
     st.subheader("📈 Análise Horizontal DFC")
@@ -422,3 +426,10 @@ elif pagina == "Balanço Patrimonial":
     unsafe_allow_html=True
     )
 
+
+    grupos_df = get_grupos_bp(empresa)
+
+    grupo_bp = st.selectbox(
+        "Grupo e método do balanço patrimonial",
+        grupos_df["GRUPO_DFP"]
+    )
