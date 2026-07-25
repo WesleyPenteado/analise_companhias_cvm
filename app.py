@@ -2,7 +2,10 @@ import streamlit as st
 
 from src.utils.components import (
     kpi_card,
-    line_chart
+    line_chart,
+    preparar_dados_waterfall,
+    waterfall_chart,
+    MAPA_DFC_WATERFALL
 )
 from src.utils.formatters import (
     formatar_brl_tabela,
@@ -29,13 +32,14 @@ from src.queries_dfc import (
     get_grupos_dfc,
     ano_mais_recente_dfc,
     var_liquida_caixa,
+    var_liquida_caixa_penultimo_ano,
     caixa_operacional,
-    caixa_investimento,
-    caixa_financiamento,
-    var_cambial_equiv,
+    caixa_operacional_penultimo_ano,
     valor_capex,
+    valor_capex_penultimo_ano,
     get_kpis_dfc_todos_os_anos,
-    get_analise_horizontal_dfc
+    get_analise_horizontal_dfc,
+    get_waterfall_último_ano,
 )
 
 from src.queries_bp import (
@@ -259,17 +263,6 @@ elif pagina == "Fluxo de Caixa":
 
     st.title("💰 Fluxo de Caixa")
 
-    st.markdown(
-        """
-        <p style='text-align: left;
-        color: red;
-        font-size: 1,5em;'>
-        RELATÓRIO EM CONSTRUÇÃO.
-        </p>
-        """,
-        unsafe_allow_html=True
-    )
-
     grupos_df = get_grupos_dfc(empresa)
 
     grupo_dfc = st.selectbox(
@@ -282,6 +275,7 @@ elif pagina == "Fluxo de Caixa":
     # ====================================  
     
     ultimo_ano_dfc = ano_mais_recente_dfc(empresa, grupo_dfc)
+    penultimo_ano_dfc = ultimo_ano_dfc - 1 if ultimo_ano_dfc else None
 
     if ultimo_ano_dfc:
         st.markdown(
@@ -309,43 +303,48 @@ elif pagina == "Fluxo de Caixa":
 
 
     # Colunas para os cards ficarem lado a lado
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    col1, col2 = st.columns(2)
 
         # Valores inteiros
-    v_var_liquida_caixa = var_liquida_caixa(empresa, grupo_dfc)
+    v_var_liq_caixa = var_liquida_caixa(empresa, grupo_dfc)
+    v_var_liq_caixa_penultimo_ano = var_liquida_caixa_penultimo_ano(empresa, grupo_dfc)
     v_caixa_operacional = caixa_operacional(empresa, grupo_dfc)
-    v_caixa_investimento = caixa_investimento(empresa, grupo_dfc)
-    v_caixa_financiamento = caixa_financiamento(empresa, grupo_dfc)
-    v_var_cambial_equiv = var_cambial_equiv(empresa, grupo_dfc)
     v_fluxo_caixa_livre = v_caixa_operacional - (valor_capex(empresa, grupo_dfc)*-1)
+    v_caixa_operacional_penultimo_ano = caixa_operacional_penultimo_ano(empresa, grupo_dfc, penultimo_ano_dfc)
+    v_fluxo_caixa_livre_penultimo_ano = v_caixa_operacional_penultimo_ano - (valor_capex_penultimo_ano(empresa, grupo_dfc, penultimo_ano_dfc)*-1)
+
 
 
     # Formata o número no padrão brasileiro
-    valor_formatado1 = format_brl(v_var_liquida_caixa)
-    valor_formatado2 = format_brl(v_caixa_operacional)
-    valor_formatado3 = format_brl(v_caixa_investimento)
-    valor_formatado4 = format_brl(v_caixa_financiamento)
-    valor_formatado5 = format_brl(v_var_cambial_equiv)
-    valor_formatado6 = format_brl(v_fluxo_caixa_livre)
+    valor_formatado1 = format_brl(v_var_liq_caixa)
+    valor_formatado2 = format_brl(v_fluxo_caixa_livre)
+    valor_formatado3 = format_brl(v_var_liq_caixa_penultimo_ano)
+    valor_formatado4 = format_brl(v_fluxo_caixa_livre_penultimo_ano)
 
     # KPI's percentuais
-    # perc_mg_bruta = (v_mg_bruta / v_receita) * 100 if v_receita else 0
-    # perc_ebitda = (v_ebitda / v_receita) * 100 if v_receita else 0
-    # perc_lucro_liquido = (v_lucro_liquido / v_receita) * 100 if v_receita else 0
+    perc_yoy_var_liq_caixa = ((v_var_liq_caixa - v_var_liq_caixa_penultimo_ano) / v_var_liq_caixa_penultimo_ano * 100 
+                                   if v_var_liq_caixa_penultimo_ano else 0)
 
+    perc_yoy_fluxo_caixa_livre = ((v_fluxo_caixa_livre - v_fluxo_caixa_livre_penultimo_ano) / v_fluxo_caixa_livre_penultimo_ano * 100
+                                   if v_fluxo_caixa_livre_penultimo_ano else 0)
     
     with col1:
-        kpi_card("Variação de Caixa", valor_formatado1)
+        kpi_card("Variação de Caixa", valor_formatado1, perc_yoy_var_liq_caixa, label_percentual="YoY")
     with col2:
-        kpi_card("Operacional", valor_formatado2)
-    with col3:
-        kpi_card("Investimento", valor_formatado3)
-    with col4:
-        kpi_card("Financiamento", valor_formatado4)
-    with col5:
-        kpi_card("Variação Cambial", valor_formatado5)
-    with col6:
-        kpi_card("Cx Livre (Op - Capex)", valor_formatado6)
+        kpi_card("Fluxo de Caixa Livre (Operacional - CAPEX)", valor_formatado2, perc_yoy_fluxo_caixa_livre, label_percentual="YoY")
+
+
+    # ====================================
+    # Gráficos Waterfall
+    # ====================================    
+
+    df_raw = get_waterfall_último_ano(empresa, grupo_dfc, ultimo_ano_dfc)
+
+    if not df_raw.empty:
+        df_wf = preparar_dados_waterfall(df_raw, MAPA_DFC_WATERFALL)
+        waterfall_chart(df_wf, titulo=f"Fluxo de Caixa {ultimo_ano_dfc}", formato_y="monetario")
+
+
 
     # ====================================
     # Gráficos de Linha
@@ -372,7 +371,7 @@ elif pagina == "Fluxo de Caixa":
             {"col": "6.02", "label": "Cx Investimento"},
             {"col": "6.03", "label": "Cx Financiamento"},
             {"col": "6.04", "label": "Var Cambial"},
-            {"col": "6.05", "label": "Var Liq."}
+            {"col": "6.05", "label": "Variação Líquida"}
         ],
         titulo="Evolução de Caixa x Ano",
         formato_y="numero",
