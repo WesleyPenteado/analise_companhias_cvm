@@ -3,6 +3,27 @@ import plotly.graph_objects as go
 import pandas as pd
 
 
+# ====================================
+# Informação de texto customizada
+# ====================================
+def custom_info(texto, cor_fundo="#e8f4fd", cor_texto="#0c5480", cor_borda="#0c5480"):
+    '''Exibe uma caixa de informação customizada com cores e estilo definidos.'''
+    st.markdown(
+        f"""
+        <div style="
+            background-color: {cor_fundo};
+            color: {cor_texto};
+            border-left: 4px solid {cor_borda};
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 0px;
+        ">
+            {texto}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 
 # ====================================
 # CARDS

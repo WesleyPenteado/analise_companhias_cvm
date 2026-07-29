@@ -1,6 +1,7 @@
 import streamlit as st
 
 from src.utils.components import (
+    custom_info,
     kpi_card,
     line_chart,
     preparar_dados_waterfall,
@@ -10,6 +11,7 @@ from src.utils.components import (
 from src.utils.formatters import (
     formatar_brl_tabela,
     format_brl,
+    format_percentual,
     formatar_variacao
 )
 from src.queries_dre import (
@@ -43,7 +45,11 @@ from src.queries_dfc import (
 )
 
 from src.queries_bp import (
-    get_grupos_bp
+    get_grupos_bp,
+    ano_mais_recente_bp,
+    tipo_bp,
+    ativo_circulante_ou_caixa,
+    passivo_circulante_ou_financeiro
 )
 
 # ====================================
@@ -118,7 +124,7 @@ if pagina == "DRE":
                     KPI's referentes ao ano mais recente disponível: {ultimo_ano_dre}.
                 </li>
                 <li>
-                    Valores expressos em R$ mil
+                    Valores expressos em R$ mil quando moeda
                 </li>
             </ul>
             """,
@@ -270,12 +276,14 @@ elif pagina == "Fluxo de Caixa":
         grupos_df["GRUPO_DFP"]
     )
 
-    # ====================================
-    # CARDS TOPO PÁGINA
-    # ====================================  
     
     ultimo_ano_dfc = ano_mais_recente_dfc(empresa, grupo_dfc)
     penultimo_ano_dfc = ultimo_ano_dfc - 1 if ultimo_ano_dfc else None
+
+    # ====================================
+    # CARDS TOPO PÁGINA
+    # ====================================  
+
 
     if ultimo_ano_dfc:
         st.markdown(
@@ -291,7 +299,7 @@ elif pagina == "Fluxo de Caixa":
                     KPI's referentes ao ano mais recente disponível: {ultimo_ano_dfc}.
                 </li>
                 <li>
-                    Valores expressos em R$ mil
+                    Valores expressos em R$ mil quando moeda
                 </li>
             </ul>
             """,
@@ -426,9 +434,79 @@ elif pagina == "Balanço Patrimonial":
     )
 
 
-    grupos_df = get_grupos_bp(empresa)
+    grupo_bp = get_grupos_bp(empresa)
 
     grupo_bp = st.selectbox(
         "Grupo e método do balanço patrimonial",
-        grupos_df["GRUPO_DFP"]
+        grupo_bp["GRUPO_DFP"]
     )
+
+    ultimo_ano_bp = ano_mais_recente_bp(empresa, grupo_bp)
+    pernultimo_ano_bp = ultimo_ano_bp - 1 if ultimo_ano_bp else None
+
+    tipo_bp_value = tipo_bp(empresa, grupo_bp, ultimo_ano_bp)
+
+    if tipo_bp_value == "Instituição Não Financeira":
+        custom_info("<b>Instituição Não Financeira</b>: será exibido relatório padrão de balanço patrimonial")
+
+        # ====================================
+        # CARDS TOPO PÁGINA
+        # ====================================  
+
+
+        if ultimo_ano_bp:
+            st.markdown(
+                f"""
+                <ul style='
+                    color: gray;
+                    font-size: 0.85em;
+                    padding-left: 18px;
+                    margin-top: 5px;
+                    margin-bottom: 25px;
+                '>
+                    <li style='margin-bottom: 2px;'>
+                        KPI's referentes ao ano mais recente disponível: {ultimo_ano_bp}.
+                    </li>
+                    <li>
+                        Valores expressos em R$ mil quando moeda
+                    </li>
+                </ul>
+                """,
+                unsafe_allow_html=True
+            )
+
+        else:
+            st.warning("Nenhum dado disponível para a empresa e grupo selecionados.")
+
+
+        # Colunas para os cards ficarem lado a lado
+        col1, col2, col3, col4, col5 = st.columns(5)
+
+            # Valores inteiros
+        a_circulante_101 = ativo_circulante_ou_caixa(empresa, grupo_bp, ultimo_ano_bp)
+        p_circulante_201 = passivo_circulante_ou_financeiro(empresa, grupo_bp, ultimo_ano_bp)
+        a_circulante_101_penultimo = ativo_circulante_ou_caixa(empresa, grupo_bp, pernultimo_ano_bp)
+        p_circulante_201_penultimo = passivo_circulante_ou_financeiro(empresa, grupo_bp, pernultimo_ano_bp)
+
+        # Formata o número no padrão brasileiro
+        valor_formatado1 = format_brl(a_circulante_101)
+        valor_formatado2 = format_brl(p_circulante_201)
+        valor_formatado3 = format_brl(a_circulante_101_penultimo)
+        valor_formatado4 = format_brl(p_circulante_201_penultimo)
+
+        # KPI's percentuais
+        liq_corrente = (a_circulante_101 / p_circulante_201) * 100 if p_circulante_201 else 0
+        perc_liq_corrente = format_percentual(liq_corrente) 
+        liq_corrente_penultimo = ((a_circulante_101_penultimo / p_circulante_201_penultimo) * 100) if p_circulante_201_penultimo else 0
+        perc_yoy_liq_corrente = ((liq_corrente - liq_corrente_penultimo) / liq_corrente_penultimo * 100) if liq_corrente_penultimo else 0
+        
+        with col1:
+            kpi_card("Liq. Corrente", perc_liq_corrente, perc_yoy_liq_corrente, label_percentual="YoY")
+
+    else:
+        custom_info(
+            "<b>Instituição Financeira</b>: executada análise específica para este modelo de empresa",
+            cor_fundo="#fff8e1",
+            cor_texto="#7a5c00",
+            cor_borda="#f0b400"
+        )
