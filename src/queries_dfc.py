@@ -1,16 +1,5 @@
 import pandas as pd
-import streamlit as st
-from sqlalchemy import create_engine
-from pathlib import Path
-
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent  # sobe de src/
-DB_PATH = BASE_DIR / "data" / "db" / "cvm.db"
-
-DATABASE_URL = f"sqlite:///{DB_PATH}"
-
-engine = create_engine(DATABASE_URL)
+from src.database import cvm_engine
 
 
 def get_grupos_dfc(empresa):
@@ -22,7 +11,7 @@ def get_grupos_dfc(empresa):
     ORDER BY GRUPO_DFP
     """
 
-    return pd.read_sql(query, engine)
+    return pd.read_sql(query, cvm_engine)
 
 def ano_mais_recente_dfc(empresa, grupo_dfc):
     '''Retorna o ano mais recente de acordo com a empresa e grupo selecionados'''
@@ -32,7 +21,7 @@ def ano_mais_recente_dfc(empresa, grupo_dfc):
     WHERE DENOM_CIA = '{empresa}'
     AND GRUPO_DFP = '{grupo_dfc}'
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["max_ano"] is None:
         return None
@@ -50,7 +39,7 @@ def var_liquida_caixa(empresa, grupo_dfc):
     ORDER BY ANO DESC
     LIMIT 1
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["VL_CONTA"] is None:
         return None
@@ -67,7 +56,7 @@ def var_liquida_caixa_penultimo_ano(empresa, grupo_dfc):
     AND GRUPO_DFP = '{grupo_dfc}'
     AND ANO = (SELECT MAX(ANO) - 1 FROM dfc WHERE DENOM_CIA = '{empresa}' AND GRUPO_DFP = '{grupo_dfc}')
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["VL_CONTA"] is None:
         return None
@@ -86,7 +75,7 @@ def caixa_operacional(empresa, grupo_dfc):
     ORDER BY ANO DESC
     LIMIT 1
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["VL_CONTA"] is None:
         return None
@@ -103,7 +92,7 @@ def caixa_operacional_penultimo_ano(empresa, grupo_dfc, penultimo_ano_dfc):
     AND GRUPO_DFP = '{grupo_dfc}'
     AND ANO = {penultimo_ano_dfc}
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["VL_CONTA"] is None:
         return None
@@ -121,7 +110,7 @@ def caixa_investimento(empresa, grupo_dfc):
     ORDER BY ANO DESC
     LIMIT 1
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["VL_CONTA"] is None:
         return None
@@ -139,7 +128,7 @@ def caixa_financiamento(empresa, grupo_dfc):
     ORDER BY ANO DESC
     LIMIT 1
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["VL_CONTA"] is None:
         return None
@@ -157,7 +146,7 @@ def var_cambial_equiv(empresa, grupo_dfc):
     ORDER BY ANO DESC
     LIMIT 1
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["VL_CONTA"] is None:
         return None
@@ -209,7 +198,7 @@ def valor_capex(empresa, grupo_dfc):
     ORDER BY ANO DESC
     LIMIT 1
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["CAPEX"] is None:
         return None
@@ -259,7 +248,7 @@ def valor_capex_penultimo_ano(empresa, grupo_dfc, penultimo_ano_dfc):
     AND LOWER(ds_conta) NOT LIKE '%participa%'
     AND LOWER(ds_conta) NOT LIKE '%aplicações financeiras%'
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["CAPEX"] is None:
         return None
@@ -282,7 +271,7 @@ def get_waterfall_último_ano(empresa, grupo_dfc, ultimo_ano_dfc):
         AND CD_CONTA IN ('6.05.01', '6.01', '6.02', '6.03', '6.04', '6.05.02')
     ORDER BY CD_CONTA  
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     return df if not df.empty else pd.DataFrame(columns=["CD_CONTA", "DS_CONTA", "VL_CONTA", "DT_FIM_EXERC"])
 
@@ -305,7 +294,7 @@ def get_kpis_dfc_todos_os_anos(empresa, grupo_dfc):
     )
     ORDER BY CD_CONTA,ANO
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     return df if not df.empty else pd.DataFrame(columns=["CD_CONTA", "ANO", "VL_CONTA"])
 
@@ -357,5 +346,5 @@ def get_analise_horizontal_dfc(empresa, grupo_dfc):
     FROM dados
     ORDER BY Conta;
     """
-    return pd.read_sql(query, engine)
+    return pd.read_sql(query, cvm_engine)
 

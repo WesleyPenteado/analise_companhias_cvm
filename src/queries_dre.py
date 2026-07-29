@@ -1,16 +1,5 @@
 import pandas as pd
-import streamlit as st
-from sqlalchemy import create_engine
-from pathlib import Path
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent  # sobe de src/
-DB_PATH = BASE_DIR / "data" / "db" / "cvm.db"
-
-DATABASE_URL = f"sqlite:///{DB_PATH}"
-
-engine = create_engine(DATABASE_URL)
-
+from src.database import cvm_engine
 
 def get_empresas():
     '''Retorna uma lista de empresas distintas presentes na tabela DRE.'''
@@ -20,7 +9,7 @@ def get_empresas():
     ORDER BY DENOM_CIA
     """
 
-    return pd.read_sql(query, engine)
+    return pd.read_sql(query, cvm_engine)
 
 def get_grupos_dre():
     '''Retorna uma lista de grupos distintos presentes na tabela DRE. Grupos representam os tipos de demonstração: consolidado, individual e etc'''
@@ -30,7 +19,7 @@ def get_grupos_dre():
     ORDER BY GRUPO_DFP
     """
 
-    return pd.read_sql(query, engine)
+    return pd.read_sql(query, cvm_engine)
 
 def ano_mais_recente(empresa, grupo):
     '''Retorna o ano mais recente de acordo com a empresa e grupo selecionados'''
@@ -40,7 +29,7 @@ def ano_mais_recente(empresa, grupo):
     WHERE DENOM_CIA = '{empresa}'
     AND GRUPO_DFP = '{grupo}'
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if df.empty or df.iloc[0]["max_ano"] is None:
         return None
@@ -67,7 +56,7 @@ def get_receita_card(empresa, grupo):
     AND DENOM_CIA = '{empresa}'
     AND GRUPO_DFP = '{grupo}';
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if not df.empty:
         return float(df.iloc[0]["VL_CONTA"])
@@ -91,7 +80,7 @@ def get_mg_bruta_card(empresa, grupo):
     AND DENOM_CIA = '{empresa}'
     AND GRUPO_DFP = '{grupo}';
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if not df.empty:
         return float(df.iloc[0]["VL_CONTA"])
@@ -122,7 +111,7 @@ def get_ebit_card(empresa, grupo):
     END
     LIMIT 1;
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if not df.empty:
         return float(df.iloc[0]["VL_CONTA"])
@@ -148,7 +137,7 @@ def get_ebitda_card(empresa, grupo):
     AND DENOM_CIA = '{empresa}'
     AND GRUPO_DFP = '{grupo}';
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if not df.empty:
         return float(df.iloc[0]["VL_CONTA"]) * -1 # invertendo sinal para somar ao EBIT depois
@@ -173,7 +162,7 @@ def get_lucro_liquido(empresa, grupo):
     AND DENOM_CIA = '{empresa}'
     AND GRUPO_DFP = '{grupo}';
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     if not df.empty:
         return float(df.iloc[0]["VL_CONTA"])
@@ -192,7 +181,7 @@ def get_receita_todos_os_anos(empresa, grupo):
     AND DENOM_CIA = '{empresa}'
     AND GRUPO_DFP = '{grupo}';
     """
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     return df if not df.empty else pd.DataFrame(columns=["ANO", "VL_CONTA"])
 
@@ -285,7 +274,7 @@ def get_kpis_todos_os_anos(empresa, grupo):
     ORDER BY r.ANO;
     """
     
-    df = pd.read_sql(query, engine)
+    df = pd.read_sql(query, cvm_engine)
 
     return df if not df.empty else pd.DataFrame(columns=["ANO", "MG_BRUTA", "EBITDA", "LUCRO_LIQ"])
 
@@ -319,7 +308,7 @@ def get_dre_empresa(empresa, grupo):
         CD_CONTA
     """
 
-    return pd.read_sql(query, engine)
+    return pd.read_sql(query, cvm_engine)
 
 
 def get_analise_horizontal_dre(empresa, grupo):
@@ -370,7 +359,7 @@ def get_analise_horizontal_dre(empresa, grupo):
     FROM dados
     ORDER BY Conta;
     """
-    return pd.read_sql(query, engine)
+    return pd.read_sql(query, cvm_engine)
 
 
 def get_analise_vertical_dre(empresa, grupo):
@@ -429,4 +418,4 @@ def get_analise_vertical_dre(empresa, grupo):
     FROM dados
     ORDER BY Conta;
     """
-    return pd.read_sql(query, engine)
+    return pd.read_sql(query, cvm_engine)
