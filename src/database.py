@@ -21,6 +21,7 @@ cvm_session = sessionmaker(
     bind=cvm_engine
 )
 cvm_base = declarative_base()
+view_base = declarative_base()
 
 
 # __ Dependências FastAPI ____________________________

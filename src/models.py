@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date, Numeric
 from sqlalchemy.orm import declarative_base
-from src.database import cvm_base
+from src.database import cvm_base, view_base
 
 
 class DRE_Model(cvm_base):
@@ -67,3 +67,25 @@ class BP_Model(cvm_base):
     VL_CONTA = Column(Numeric(20, 4), nullable=False)
     ST_CONTA_FIXA = Column(String(1), nullable=False)  # "S" ou "N"
     ANO = Column(Integer, nullable=True)
+
+
+class View_BP_Tipo_Anual_Model(view_base):
+    __tablename__ = "vw_bp_tipo_anual"
+
+    DENOM_CIA = Column(String, primary_key=True)
+    GRUPO_DFP = Column(String, primary_key=True)
+    ANO = Column(Integer, primary_key=True)
+
+    tipo_empresa = Column(String)
+
+
+class View_BP_Tipo_Empresa_Model(view_base):
+    __tablename__ = "vw_bp_tipo_empresa"
+
+    DENOM_CIA = Column(String, primary_key=True)
+    GRUPO_DFP = Column(String, primary_key=True)
+    ANO = Column(Integer, primary_key=True)
+
+    tipo_empresa = Column(String)
+    tipo_atual = Column(String)
+    considerar = Column(Integer)
