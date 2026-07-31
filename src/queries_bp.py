@@ -79,3 +79,20 @@ def passivo_circulante_ou_financeiro(empresa, grupo_bp, ultimo_ano_bp):
         return None
 
     return float(df.iloc[0]["VL_CONTA"])
+
+def ativo_estoques(empresa, grupo_bp, ultimo_ano_bp):
+    '''Retorna o valor de estoques para empresas que não são instituições financeiras'''
+    query = f"""
+    SELECT VL_CONTA
+    FROM bp
+    WHERE CD_CONTA = '1.01.04' -- Conta padrão para estoques
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo_bp}'
+    AND ANO = {ultimo_ano_bp}
+    """
+    df = pd.read_sql(query, cvm_engine)
+
+    if df.empty or df.iloc[0]["VL_CONTA"] is None:
+        return None
+
+    return float(df.iloc[0]["VL_CONTA"])

@@ -49,7 +49,8 @@ from src.queries_bp import (
     ano_mais_recente_bp,
     tipo_bp,
     ativo_circulante_ou_caixa,
-    passivo_circulante_ou_financeiro
+    passivo_circulante_ou_financeiro,
+    ativo_estoques
 )
 
 # ====================================
@@ -442,7 +443,7 @@ elif pagina == "Balanço Patrimonial":
     )
 
     ultimo_ano_bp = ano_mais_recente_bp(empresa, grupo_bp)
-    pernultimo_ano_bp = ultimo_ano_bp - 1 if ultimo_ano_bp else None
+    penultimo_ano_bp = ultimo_ano_bp - 1 if ultimo_ano_bp else None
 
     tipo_bp_value = tipo_bp(empresa, grupo_bp, ultimo_ano_bp)
 
@@ -485,23 +486,36 @@ elif pagina == "Balanço Patrimonial":
             # Valores inteiros
         a_circulante_101 = ativo_circulante_ou_caixa(empresa, grupo_bp, ultimo_ano_bp)
         p_circulante_201 = passivo_circulante_ou_financeiro(empresa, grupo_bp, ultimo_ano_bp)
-        a_circulante_101_penultimo = ativo_circulante_ou_caixa(empresa, grupo_bp, pernultimo_ano_bp)
-        p_circulante_201_penultimo = passivo_circulante_ou_financeiro(empresa, grupo_bp, pernultimo_ano_bp)
+        a_circulante_101_penultimo = ativo_circulante_ou_caixa(empresa, grupo_bp, penultimo_ano_bp)
+        p_circulante_201_penultimo = passivo_circulante_ou_financeiro(empresa, grupo_bp, penultimo_ano_bp)
+        a_estoques = ativo_estoques(empresa, grupo_bp, ultimo_ano_bp)
+        a_estoques_penultimo = ativo_estoques(empresa, grupo_bp, penultimo_ano_bp)
 
         # Formata o número no padrão brasileiro
         valor_formatado1 = format_brl(a_circulante_101)
         valor_formatado2 = format_brl(p_circulante_201)
         valor_formatado3 = format_brl(a_circulante_101_penultimo)
         valor_formatado4 = format_brl(p_circulante_201_penultimo)
+        valor_formatado5 = format_brl(a_estoques)
 
-        # KPI's percentuais
+        # Cálculo dos KPI's percentuais
         liq_corrente = (a_circulante_101 / p_circulante_201) * 100 if p_circulante_201 else 0
-        perc_liq_corrente = format_percentual(liq_corrente) 
         liq_corrente_penultimo = ((a_circulante_101_penultimo / p_circulante_201_penultimo) * 100) if p_circulante_201_penultimo else 0
         perc_yoy_liq_corrente = ((liq_corrente - liq_corrente_penultimo) / liq_corrente_penultimo * 100) if liq_corrente_penultimo else 0
+        liq_seca = ((a_circulante_101 - a_estoques) / p_circulante_201) * 100 if p_circulante_201 else 0
+        liq_seca_penultimo = (((a_circulante_101_penultimo - a_estoques_penultimo) / p_circulante_201_penultimo) * 100) if p_circulante_201_penultimo else 0
+        perc_yoy_liq_seca = ((liq_seca - liq_seca_penultimo) / liq_seca_penultimo * 100) if liq_seca_penultimo else 0
+
+        # Formatação percentual
+        perc_liq_corrente = format_percentual(liq_corrente)
+        perc_liq_seca = format_percentual(liq_seca)
+
         
         with col1:
             kpi_card("Liq. Corrente", perc_liq_corrente, perc_yoy_liq_corrente, label_percentual="YoY")
+        with col2:
+            kpi_card("Liq. Seca", perc_liq_seca, perc_yoy_liq_seca, label_percentual="YoY")
+
 
     else:
         custom_info(
