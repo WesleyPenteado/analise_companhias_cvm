@@ -54,26 +54,40 @@ Gerenciador de pacotes: **Poetry**
 analise_companhias_cvm/
 │
 ├── src/
-│   ├── ingestion/              # Download dos CSVs da CVM
-│   ├── schema/                 # Definição dos schemas
-│   ├── validator/              # Validação com Pydantic
-│   ├── transformation_dre/     # Limpeza e transformação dos dados
-│   ├── database/               # Configuração do banco SQLite
-│   ├── models/                 # Modelos de tabelas (SQLAlchemy)
-│   ├── load/                   # Carga dos dados no banco
-│   ├── queries_dre.py          # Queries da DRE
+│   ├── __init__.py
+│   ├── main.py                     # Ponto de entrada da pipeline (ingestão → transformação → carga)
+│   ├── ingestion.py                # Download dos CSVs da CVM
+│   ├── schema.py                   # Definição dos schemas (Pydantic)
+│   ├── validator.py                # Validação dos dados com Pydantic
+│   ├── database.py                 # Configuração da conexão com o banco SQLite
+│   ├── models.py                   # Modelos de tabelas (SQLAlchemy)
+│   ├── load.py                     # Carga dos dados no banco (DRE, DFC, BP)
+│   ├── load_views.py               # Criação de views auxiliares (ex: views de BP)
+│   │
+│   ├── transformation_dre.py       # Limpeza e transformação dos dados de DRE
+│   ├── transformation_dfc.py       # Limpeza e transformação dos dados de DFC
+│   ├── transformation_bp.py        # Limpeza e transformação dos dados de BP
+│   │
+│   ├── queries_dre.py              # Queries da DRE
+│   ├── queries_dfc.py              # Queries da DFC
+│   ├── queries_bp.py               # Queries do BP
+│   │
 │   └── utils/
-│       ├── components.py       # Componentes reutilizáveis (cards, gráficos)
-│       └── formatters.py       # Formatadores de valores (BRL, %)
+│       ├── __init__.py
+│       ├── components.py           # Componentes reutilizáveis (cards, gráficos, waterfall)
+│       └── formatters.py           # Formatadores de valores (BRL, %)
+│
+├── img/
+│   └── img1.jpg                    # Screenshot do dashboard
 │
 ├── data/
-│   ├── raw/                    # CSVs baixados da CVM (gerado automaticamente)
-│   └── clean/                  # Dados após transformação (gerado automaticamente)
+│   ├── raw/                        # CSVs baixados da CVM (gerado automaticamente)
+│   └── clean/                      # Dados após transformação (gerado automaticamente)
 │
-├── app.py                      # Ponto de entrada do Streamlit
-├── pyproject.toml              # Dependências e configuração do Poetry
-├── poetry.lock                 # Lock file das dependências
-├── .python-version             # Versão do Python (3.12.1)
+├── app.py                          # Ponto de entrada do Streamlit (DRE, DFC e BP)
+├── pyproject.toml                  # Dependências e configuração do Poetry
+├── poetry.lock                     # Lock file das dependências
+├── .python-version                 # Versão do Python (3.12.1)
 └── .gitignore
 ```
 
@@ -138,14 +152,25 @@ Acesse em: [http://localhost:8501](http://localhost:8501)
 - Filtro por empresa e tipo de demonstração (Consolidada ou individual)
 - KPIs: Receita Líquida, Margem Bruta, EBITDA e Lucro Líquido
 - Análise de tendência para cada KPI
-- Tabela completa da DRE para análisar detalhadamente cada conta
+- Tabela da DRE para análisar horizontalmente e verticalmente cada conta
 
-**Resultado Dashboard Streamlit**
+**Resultado Página DRE**
 ![alt text](img/img1.jpg)
+
+
+**DFC — Demonstração de Fluxo de Caixa**
+- KPIS: Variação de caixa e fluxo de caixa livre do último ano e comparativo year over year
+- Gráfico de cascata avaliando o desempenho do caixa do último ano
+- Análise de tendência das principais contas de caixa 
+- Tabela DFC com todas as contas para análise horizontal detalhada
+
+**Resultado Página DFC**
+![alt text](img/img2.jpg)
+
+
 
 ### 🚧 Em Desenvolvimento
 
-- **Análise de Fluxo de Caixa (DFC)** — estrutura criada, relatório em construção
 - **Análise de Balanço Patrimonial (BP)** — estrutura criada, relatório em construção
 
 ---
