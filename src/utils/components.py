@@ -28,7 +28,7 @@ def custom_info(texto, cor_fundo="#e8f4fd", cor_texto="#0c5480", cor_borda="#0c5
 # ====================================
 # CARDS
 # ====================================
-def kpi_card(titulo, valor, percentual=None, label_percentual=None):
+def kpi_card(titulo, valor, percentual=None, label_percentual=None, maior_melhor=True):
     '''Cria um card de KPI com título, valor e percentual de variação ou kpi opcional.
     
     label_percentual: texto opcional exibido antes do percentual, ex: "YoY", "vs. ano anterior"
@@ -38,7 +38,13 @@ def kpi_card(titulo, valor, percentual=None, label_percentual=None):
     percentual_html = ""
 
     if percentual is not None:
-        cor = "#10B981" if percentual >= 0 else "#EF4444"
+
+        if maior_melhor:
+            positivo = percentual >= 0
+        else:
+            positivo = percentual <= 0
+
+        cor = "#10B981" if positivo else "#EF4444"
 
         label_html = ""
         if label_percentual:
