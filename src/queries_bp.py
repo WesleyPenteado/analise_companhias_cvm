@@ -96,3 +96,56 @@ def ativo_estoques(empresa, grupo_bp, ultimo_ano_bp):
         return None
 
     return float(df.iloc[0]["VL_CONTA"])
+
+
+def passivo_nao_circulante(empresa, grupo_bp, ultimo_ano_bp):
+    '''Retorna o passivo não circulante para empresas que não são instituições financeiras de acordo com a empresa e grupo selecionados'''
+    query = f"""
+    SELECT VL_CONTA
+    FROM bp
+    WHERE CD_CONTA = '2.02' -- Conta padrão
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo_bp}'
+    AND ANO = {ultimo_ano_bp}
+    """
+    df = pd.read_sql(query, cvm_engine)
+
+    if df.empty or df.iloc[0]["VL_CONTA"] is None:
+        return None
+
+    return float(df.iloc[0]["VL_CONTA"])
+
+def patrimonio_liquido(empresa, grupo_bp, ultimo_ano_bp):
+    '''Retorna o patrimônio líquido para empresas que não são instituições financeiras de acordo com a empresa e grupo selecionados'''
+    query = f"""
+    SELECT VL_CONTA
+    FROM bp
+    WHERE CD_CONTA = '2.03' -- Conta padrão
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo_bp}'
+    AND ANO = {ultimo_ano_bp}
+    """
+    df = pd.read_sql(query, cvm_engine)
+
+    if df.empty or df.iloc[0]["VL_CONTA"] is None:
+        return None
+
+    return float(df.iloc[0]["VL_CONTA"])
+
+
+def ativo_total(empresa, grupo_bp, ultimo_ano_bp):
+    '''Retorna o ativo total para empresas que não são instituições financeiras de acordo com a empresa e grupo selecionados'''
+    query = f"""
+    SELECT VL_CONTA
+    FROM bp
+    WHERE CD_CONTA = '1' -- Conta padrão
+    AND DENOM_CIA = '{empresa}'
+    AND GRUPO_DFP = '{grupo_bp}'
+    AND ANO = {ultimo_ano_bp}
+    """
+    df = pd.read_sql(query, cvm_engine)
+
+    if df.empty or df.iloc[0]["VL_CONTA"] is None:
+        return None
+
+    return float(df.iloc[0]["VL_CONTA"])

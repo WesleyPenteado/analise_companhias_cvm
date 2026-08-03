@@ -41,7 +41,7 @@ from src.queries_dfc import (
     valor_capex_penultimo_ano,
     get_kpis_dfc_todos_os_anos,
     get_analise_horizontal_dfc,
-    get_waterfall_último_ano,
+    get_waterfall_último_ano
 )
 
 from src.queries_bp import (
@@ -50,7 +50,10 @@ from src.queries_bp import (
     tipo_bp,
     ativo_circulante_ou_caixa,
     passivo_circulante_ou_financeiro,
-    ativo_estoques
+    ativo_estoques,
+    passivo_nao_circulante,
+    patrimonio_liquido,
+    ativo_total
 )
 
 # ====================================
@@ -165,13 +168,13 @@ if pagina == "DRE":
         kpi_card("Receita Líquida", valor_formatado1)
 
     with col2:
-        kpi_card("Margem Bruta", valor_formatado2, perc_mg_bruta)
+        kpi_card("Margem Bruta", valor_formatado2, perc_mg_bruta, maior_melhor=True)
  
     with col3:
-        kpi_card("EBITDA", valor_formatado3, perc_ebitda)
+        kpi_card("EBITDA", valor_formatado3, perc_ebitda, maior_melhor=True)
 
     with col4:
-        kpi_card("Lucro Líquido", valor_formatado4, perc_lucro_liquido)
+        kpi_card("Lucro Líquido", valor_formatado4, perc_lucro_liquido, maior_melhor=True)
 
     
 
@@ -338,9 +341,9 @@ elif pagina == "Fluxo de Caixa":
                                    if v_fluxo_caixa_livre_penultimo_ano else 0)
     
     with col1:
-        kpi_card("Variação de Caixa", valor_formatado1, perc_yoy_var_liq_caixa, label_percentual="YoY")
+        kpi_card("Variação de Caixa", valor_formatado1, perc_yoy_var_liq_caixa, label_percentual="YoY", maior_melhor=True)
     with col2:
-        kpi_card("Fluxo de Caixa Livre (Operacional - CAPEX)", valor_formatado2, perc_yoy_fluxo_caixa_livre, label_percentual="YoY")
+        kpi_card("Fluxo de Caixa Livre (Operacional - CAPEX)", valor_formatado2, perc_yoy_fluxo_caixa_livre, label_percentual="YoY", maior_melhor=True)
 
 
     # ====================================
@@ -481,7 +484,7 @@ elif pagina == "Balanço Patrimonial":
 
 
         # Colunas para os cards ficarem lado a lado
-        col1, col2, col3, col4, col5 = st.columns(5)
+        col1, col2, col3, col4 = st.columns(4)
 
             # Valores inteiros
         a_circulante_101 = ativo_circulante_ou_caixa(empresa, grupo_bp, ultimo_ano_bp)
@@ -490,21 +493,33 @@ elif pagina == "Balanço Patrimonial":
         p_circulante_201_penultimo = passivo_circulante_ou_financeiro(empresa, grupo_bp, penultimo_ano_bp)
         a_estoques = ativo_estoques(empresa, grupo_bp, ultimo_ano_bp)
         a_estoques_penultimo = ativo_estoques(empresa, grupo_bp, penultimo_ano_bp)
+        p_nao_circulante202 = passivo_nao_circulante(empresa, grupo_bp, ultimo_ano_bp)
+        p_nao_circulante202_penultimo = passivo_nao_circulante(empresa, grupo_bp, penultimo_ano_bp)
+        p_patrimonio_liquido203 = patrimonio_liquido(empresa, grupo_bp, ultimo_ano_bp)
+        p_patrimonio_liquido203_penultimo = patrimonio_liquido(empresa, grupo_bp, penultimo_ano_bp)
+        a_total = ativo_total(empresa, grupo_bp, ultimo_ano_bp)
+        a_total_penultimo = ativo_total(empresa, grupo_bp, penultimo_ano_bp)
+     
 
-        # Formata o número no padrão brasileiro
-        valor_formatado1 = format_brl(a_circulante_101)
-        valor_formatado2 = format_brl(p_circulante_201)
-        valor_formatado3 = format_brl(a_circulante_101_penultimo)
-        valor_formatado4 = format_brl(p_circulante_201_penultimo)
-        valor_formatado5 = format_brl(a_estoques)
-
-        # Cálculo dos KPI's percentuais
+        # Cálculo KPI's liquidez
         liq_corrente = (a_circulante_101 / p_circulante_201) * 100 if p_circulante_201 else 0
         liq_corrente_penultimo = ((a_circulante_101_penultimo / p_circulante_201_penultimo) * 100) if p_circulante_201_penultimo else 0
         perc_yoy_liq_corrente = ((liq_corrente - liq_corrente_penultimo) / liq_corrente_penultimo * 100) if liq_corrente_penultimo else 0
+
         liq_seca = ((a_circulante_101 - a_estoques) / p_circulante_201) * 100 if p_circulante_201 else 0
         liq_seca_penultimo = (((a_circulante_101_penultimo - a_estoques_penultimo) / p_circulante_201_penultimo) * 100) if p_circulante_201_penultimo else 0
         perc_yoy_liq_seca = ((liq_seca - liq_seca_penultimo) / liq_seca_penultimo * 100) if liq_seca_penultimo else 0
+
+        # Cálculo KPI's endividamento
+        endividamento = (p_circulante_201 + p_nao_circulante202) / p_patrimonio_liquido203 * 100 if p_patrimonio_liquido203 else 0
+        endividamento_penultimo = ((p_circulante_201_penultimo + p_nao_circulante202_penultimo) / p_patrimonio_liquido203_penultimo * 100) if p_patrimonio_liquido203_penultimo else 0
+        perc_yoy_endividamento = ((endividamento - endividamento_penultimo) / endividamento_penultimo * 100) if endividamento_penultimo else 0
+
+         # Capitalização ou alavancagem financeira
+        capitalizacao = round(a_total / p_patrimonio_liquido203 if p_patrimonio_liquido203 else 0, 2)
+        capitalizacao_penultimo = round((a_total_penultimo / p_patrimonio_liquido203_penultimo) if p_patrimonio_liquido203_penultimo else 0, 2)
+        perc_yoy_capitalizacao = ((capitalizacao - capitalizacao_penultimo) / capitalizacao_penultimo * 100) if capitalizacao_penultimo else 0
+
 
         # Formatação percentual
         perc_liq_corrente = format_percentual(liq_corrente)
@@ -512,10 +527,13 @@ elif pagina == "Balanço Patrimonial":
 
         
         with col1:
-            kpi_card("Liq. Corrente", perc_liq_corrente, perc_yoy_liq_corrente, label_percentual="YoY")
+            kpi_card("Liq. Corrente", perc_liq_corrente, perc_yoy_liq_corrente, label_percentual="YoY", maior_melhor=True)
         with col2:
-            kpi_card("Liq. Seca", perc_liq_seca, perc_yoy_liq_seca, label_percentual="YoY")
-
+            kpi_card("Liq. Seca", perc_liq_seca, perc_yoy_liq_seca, label_percentual="YoY", maior_melhor=True)
+        with col3:
+            kpi_card("Particip. Cap. 3º", format_percentual(endividamento), perc_yoy_endividamento, label_percentual="YoY", maior_melhor=False)
+        with col4:
+            kpi_card("Índice de Capitalização", capitalizacao, perc_yoy_capitalizacao, label_percentual="YoY", maior_melhor=True)
 
     else:
         custom_info(
