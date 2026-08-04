@@ -6,7 +6,8 @@ from src.utils.components import (
     line_chart,
     preparar_dados_waterfall,
     waterfall_chart,
-    MAPA_DFC_WATERFALL
+    MAPA_DFC_WATERFALL,
+    stacked_bar_chart_grouped
 )
 from src.utils.formatters import (
     formatar_brl_tabela,
@@ -53,7 +54,8 @@ from src.queries_bp import (
     ativo_estoques,
     passivo_nao_circulante,
     patrimonio_liquido,
-    ativo_total
+    ativo_total,
+    kpis_evolucao_ativo_passivo_pl
 )
 
 # ====================================
@@ -502,38 +504,76 @@ elif pagina == "Balanço Patrimonial":
      
 
         # Cálculo KPI's liquidez
-        liq_corrente = (a_circulante_101 / p_circulante_201) * 100 if p_circulante_201 else 0
-        liq_corrente_penultimo = ((a_circulante_101_penultimo / p_circulante_201_penultimo) * 100) if p_circulante_201_penultimo else 0
+        liq_corrente = round((a_circulante_101 / p_circulante_201) if p_circulante_201 else 0, 2)
+        liq_corrente_penultimo = round((a_circulante_101_penultimo / p_circulante_201_penultimo) if p_circulante_201_penultimo else 0, 2)
         perc_yoy_liq_corrente = ((liq_corrente - liq_corrente_penultimo) / liq_corrente_penultimo * 100) if liq_corrente_penultimo else 0
 
-        liq_seca = ((a_circulante_101 - a_estoques) / p_circulante_201) * 100 if p_circulante_201 else 0
-        liq_seca_penultimo = (((a_circulante_101_penultimo - a_estoques_penultimo) / p_circulante_201_penultimo) * 100) if p_circulante_201_penultimo else 0
+        liq_seca = round(((a_circulante_101 - a_estoques) / p_circulante_201) if p_circulante_201 else 0, 2)
+        liq_seca_penultimo = round(((a_circulante_101_penultimo - a_estoques_penultimo) / p_circulante_201_penultimo) if p_circulante_201_penultimo else 0, 2)
         perc_yoy_liq_seca = ((liq_seca - liq_seca_penultimo) / liq_seca_penultimo * 100) if liq_seca_penultimo else 0
 
-        # Cálculo KPI's endividamento
+        # Cálculo KPI's endividamento: grau de dependência do capital de terceiros em relação ao capital próprio.
         endividamento = (p_circulante_201 + p_nao_circulante202) / p_patrimonio_liquido203 * 100 if p_patrimonio_liquido203 else 0
         endividamento_penultimo = ((p_circulante_201_penultimo + p_nao_circulante202_penultimo) / p_patrimonio_liquido203_penultimo * 100) if p_patrimonio_liquido203_penultimo else 0
         perc_yoy_endividamento = ((endividamento - endividamento_penultimo) / endividamento_penultimo * 100) if endividamento_penultimo else 0
 
-         # Capitalização ou alavancagem financeira
-        capitalizacao = round(a_total / p_patrimonio_liquido203 if p_patrimonio_liquido203 else 0, 2)
-        capitalizacao_penultimo = round((a_total_penultimo / p_patrimonio_liquido203_penultimo) if p_patrimonio_liquido203_penultimo else 0, 2)
+         # Capitalização ou alavancagem financeira: proporção do ativo financiada com capital próprio.
+        capitalizacao = round(p_patrimonio_liquido203 / a_total * 100 if a_total else 0, 2)
+        capitalizacao_penultimo = round((p_patrimonio_liquido203_penultimo / a_total_penultimo * 100) if a_total_penultimo else 0, 2)
         perc_yoy_capitalizacao = ((capitalizacao - capitalizacao_penultimo) / capitalizacao_penultimo * 100) if capitalizacao_penultimo else 0
-
-
-        # Formatação percentual
-        perc_liq_corrente = format_percentual(liq_corrente)
-        perc_liq_seca = format_percentual(liq_seca)
 
         
         with col1:
-            kpi_card("Liq. Corrente", perc_liq_corrente, perc_yoy_liq_corrente, label_percentual="YoY", maior_melhor=True)
+            kpi_card("Liq. Corrente", liq_corrente, perc_yoy_liq_corrente, label_percentual="YoY", maior_melhor=True)
         with col2:
-            kpi_card("Liq. Seca", perc_liq_seca, perc_yoy_liq_seca, label_percentual="YoY", maior_melhor=True)
+            kpi_card("Liq. Seca", liq_seca, perc_yoy_liq_seca, label_percentual="YoY", maior_melhor=True)
         with col3:
             kpi_card("Particip. Cap. 3º", format_percentual(endividamento), perc_yoy_endividamento, label_percentual="YoY", maior_melhor=False)
         with col4:
-            kpi_card("Índice de Capitalização", capitalizacao, perc_yoy_capitalizacao, label_percentual="YoY", maior_melhor=True)
+            kpi_card("Grau de capitalização", format_percentual(capitalizacao), perc_yoy_capitalizacao, label_percentual="YoY", maior_melhor=True)
+
+
+
+        # ====================================
+        # Gráficos de colunas empilhadas e agrupadas (Ativo vs Passivo + PL por ano)
+        # ====================================  
+        
+        _MAPA_CONTAS = {
+            "1.01": "Ativo Circulante",
+            "1.02": "Ativo Não Circulante",
+            "2.01": "Passivo Circulante",
+            "2.02": "Passivo Não Circulante",
+            "2.03": "Patrimônio Líquido",
+        }
+
+        _MAPA_GRUPO = {
+            "1.01": "Ativo",
+            "1.02": "Ativo",
+            "2.01": "Passivo + PL",
+            "2.02": "Passivo + PL",
+            "2.03": "Passivo + PL",
+        }
+
+        df = kpis_evolucao_ativo_passivo_pl(empresa, grupo_bp)
+        df["CONTA"] = df["CD_CONTA"].map(_MAPA_CONTAS)
+        df["GRUPO"] = df["CD_CONTA"].map(_MAPA_GRUPO)
+
+        stacked_bar_chart_grouped(
+            df=df,
+            col_x="ANO",
+            col_grupo="GRUPO",
+            col_conta="CONTA",
+            col_valor="VL_CONTA",
+            contas=[
+                {"col": "Ativo Não Circulante", "label": "Ativo Não Circulante"},
+                {"col": "Ativo Circulante", "label": "Ativo Circulante"},
+                {"col": "Patrimônio Líquido", "label": "Patrimônio Líquido"},                
+                {"col": "Passivo Não Circulante", "label": "Passivo Não Circulante"},
+                {"col": "Passivo Circulante", "label": "Passivo Circulante"},
+            ],
+            titulo="Evolução do Balanço Patrimonial: Ativo vs. Passivo + PL",
+            formato_y="monetario",
+        )
 
     else:
         custom_info(

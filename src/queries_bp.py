@@ -149,3 +149,33 @@ def ativo_total(empresa, grupo_bp, ultimo_ano_bp):
         return None
 
     return float(df.iloc[0]["VL_CONTA"])
+
+
+
+def kpis_evolucao_ativo_passivo_pl(empresa, grupo_bp):
+    '''Retorna um data frame com os valores de ativo, passivo e patrimônio líquido para empresas que não são instituições financeiras de acordo com a empresa e grupo selecionados'''
+    query = f"""
+    SELECT b.CD_CONTA, b.ANO, b.VL_CONTA
+    FROM bp b
+    INNER JOIN vw_bp_tipo_empresa v
+        ON b.DENOM_CIA = v.DENOM_CIA
+        AND b.GRUPO_DFP = v.GRUPO_DFP
+        AND b.ANO = v.ANO
+    WHERE b.DENOM_CIA = '{empresa}'
+    AND b.GRUPO_DFP = '{grupo_bp}'
+    AND v.tipo_empresa = 'Instituição Não Financeira'
+    AND
+    (
+        b.CD_CONTA = '1.01'
+        OR b.CD_CONTA = '1.02'
+        OR b.CD_CONTA = '2.01'
+        OR b.CD_CONTA = '2.02'
+        OR b.CD_CONTA = '2.03'
+    )
+    ORDER BY b.CD_CONTA,b.ANO;
+    """
+    df = pd.read_sql(query, cvm_engine)
+
+    return df if not df.empty else pd.DataFrame(columns=["CD_CONTA", "ANO", "VL_CONTA"])
+
+
