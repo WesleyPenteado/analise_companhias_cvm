@@ -370,3 +370,137 @@ def waterfall_chart(
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+
+# ====================================
+# GRÁFICO DE COLUNAS EMPILHADAS AGRUPADAS
+# (Ativo vs. Passivo + PL, por ano)
+# ====================================
+
+# Cores fixas por conta (Ativo/Passivo/PL) — paleta tom sobre tom, estilo corporativo
+_CORES_BP = {
+    "Ativo Circulante": "#7FA8C9",          # azul claro acinzentado
+    "Ativo Não Circulante": "#2C4E6E",      # azul petróleo escuro
+    "Passivo Circulante": "#D99A8B",        # terracota claro
+    "Passivo Não Circulante": "#8C3A2B",    # terracota/vinho escuro
+    "Patrimônio Líquido": "#C9A24B",        # dourado envelhecido
+}
+
+def stacked_bar_chart_grouped(
+    df: pd.DataFrame,
+    col_x: str,
+    col_grupo: str,
+    col_conta: str,
+    col_valor: str,
+    contas: list[dict],
+    titulo: str = "",
+    formato_y: str = "monetario",  # "monetario" | "numero" | "percentual"
+    altura: int = 420,
+    mapa_cores: dict = None,
+    mostrar_rotulos: bool = True,
+):
+    """
+    Gráfico de colunas empilhadas e agrupadas — ex: Ativo (empilhado) vs.
+    Passivo + PL (empilhado), lado a lado, para cada ano.
+
+    Parâmetros
+    ----------
+    df         : DataFrame em formato LONGO, com uma linha por (ano, grupo, conta)
+                 Colunas esperadas: col_x, col_grupo, col_conta, col_valor
+    col_x      : Coluna do eixo X externo (ex: "ANO")
+    col_grupo  : Coluna que define o agrupamento interno (ex: "Ativo" / "Passivo + PL")
+    col_conta  : Coluna com o nome da conta (usada para cor e legenda)
+    col_valor  : Coluna com o valor numérico a plotar
+    contas     : Lista de dicts com {"col": <valor da conta em col_conta>, "label": <legenda>}
+                 Define também a ORDEM de empilhamento (primeira = base da pilha)
+    titulo     : Título exibido no topo do card
+    formato_y  : Formatação dos rótulos do eixo Y
+    altura     : Altura do gráfico em pixels
+    mapa_cores : Dict opcional {label: cor}. Se não informado, usa _CORES_BP
+    mostrar_rotulos : Se True, exibe o valor de cada segmento dentro da coluna
+    """
+
+    if len(contas) > 8:
+        raise ValueError("A função suporta no máximo 8 contas.")
+
+    cores = mapa_cores or _CORES_BP
+    _paleta_fallback = ["#636EFA", "#EF553B", "#00CC96", "#AB63FA", "#FFA15A"]
+
+    # --- Formatação do eixo Y / rótulos -------------------------------------
+    _formatos = {
+        "monetario":   {"tickprefix": "R$ ", "tickformat": ",.0f", "texttemplate": "<b>R$ %{y:,.0f}</b>"},
+        "numero":      {"tickprefix": "",    "tickformat": ",.0f", "texttemplate": "<b>%{y:,.0f}</b>"},
+        "percentual":  {"tickprefix": "",    "tickformat": ".1f", "ticksuffix": "%", "texttemplate": "<b>%{y:.1f}%</b>"},
+    }
+    fmt = _formatos.get(formato_y, _formatos["numero"])
+    texttemplate = fmt.pop("texttemplate")
+
+    # --- Construção das traces ---------------------------------------------
+    fig = go.Figure()
+
+    for i, conta in enumerate(contas):
+        d = df[df[col_conta] == conta["col"]]
+        cor = cores.get(conta["label"], _paleta_fallback[i % len(_paleta_fallback)])
+
+        fig.add_trace(go.Bar(
+            x=[d[col_x], d[col_grupo]],   # eixo multicategoria: Ano (externo) > Grupo (interno)
+            y=d[col_valor],
+            name=conta["label"],
+            marker=dict(color=cor, line=dict(width=0)),
+            text=d[col_valor] if mostrar_rotulos else None,
+            texttemplate=texttemplate if mostrar_rotulos else None,
+            textposition="inside",
+            insidetextanchor="middle",
+            textfont=dict(color="#FFFFFF", size=10),
+            hovertemplate=(
+                f"<b>{conta['label']}</b><br>"
+                f"%{{x}}<br>"
+                f"Valor: %{{y:{fmt['tickformat']}}}<extra></extra>"
+            ),
+        ))
+
+    # --- Layout no formato padrão da página -------------------------------
+    fig.update_layout(
+        barmode="stack",
+        title=dict(
+            text=titulo,
+            font=dict(size=15, color="#111827", family="sans-serif"),
+            x=0,
+            pad=dict(l=4),
+        ),
+        showlegend=True,
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
+        height=altura,
+        margin=dict(l=16, r=16, t=48 if titulo else 16, b=16),
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.18,
+            xanchor="left",
+            x=0,
+            font=dict(color="#6B7280", size=12),
+        ),
+        xaxis=dict(
+            type="multicategory",
+            tickfont=dict(color="#6B7280", size=12),
+            gridcolor="#F3F4F6",
+            linecolor="#E5E7EB",
+            showline=True,
+        ),
+        yaxis=dict(
+            tickfont=dict(color="#6B7280", size=12),
+            gridcolor="#F3F4F6",
+            linecolor="#E5E7EB",
+            showline=True,
+            **fmt,
+        ),
+        hovermode="x unified",
+        bargap=0.1,
+        bargroupgap=0.18,
+        uniformtext=dict(minsize=9, mode="hide"),
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
