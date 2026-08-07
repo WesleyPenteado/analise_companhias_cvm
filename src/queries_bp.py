@@ -178,9 +178,72 @@ def kpis_evolucao_ativo_passivo_pl(empresa, grupo_bp):
 
     return df if not df.empty else pd.DataFrame(columns=["CD_CONTA", "ANO", "VL_CONTA"])
 
+def liquidez_todos_os_anos(empresa, grupo_bp):
+    '''Retorna a liquidez corrente e seca em percentuais de todos os anos disponíveis de acordo com a empresa e grupo selecionados'''
+    ''
+    query = f"""
+    WITH ativo_circulante AS (
+    SELECT
+        b.ANO,
+        b.VL_CONTA AS a_circulante
+    FROM bp b
+    INNER JOIN vw_bp_tipo_empresa v
+        ON b.DENOM_CIA = v.DENOM_CIA
+        AND b.GRUPO_DFP = v.GRUPO_DFP
+        AND b.ANO = v.ANO
+    WHERE b.CD_CONTA = '1.01'
+        AND b.DENOM_CIA = '{empresa}'
+        AND b.GRUPO_DFP = '{grupo_bp}'
+        AND v.tipo_empresa = 'Instituição Não Financeira'
+    ),
+    passivo_circulante AS (
+    SELECT
+        b.ANO,
+        b.VL_CONTA AS p_circulante
+    FROM bp b
+    WHERE b.CD_CONTA = '2.01'
+        AND b.DENOM_CIA = '{empresa}'
+        AND b.GRUPO_DFP = '{grupo_bp}'
+    ),
+    estoques AS (
+    SELECT
+        b.ANO,
+        b.VL_CONTA AS estoques
+    FROM bp b
+    WHERE b.CD_CONTA = '1.01.04'
+        AND b.DENOM_CIA = '{empresa}'
+        AND b.GRUPO_DFP = '{grupo_bp}'
+    )
+    SELECT
+        a.ANO,
+        ROUND(
+            CAST(a.a_circulante AS REAL) /
+            NULLIF(CAST(p.p_circulante AS REAL),0),
+            2
+        ) AS liq_corrente,
+        ROUND(
+            (
+                CAST(a.a_circulante AS REAL)
+                - COALESCE(CAST(e.estoques AS REAL),0)
+            )
+            /
+            NULLIF(CAST(p.p_circulante AS REAL),0),
+            2
+        ) AS liq_seca
+    FROM ativo_circulante a
+    LEFT JOIN passivo_circulante p 
+        ON p.ANO = a.ANO
+    LEFT JOIN estoques e 
+        ON e.ANO = a.ANO;
+    """
+    
+    df = pd.read_sql(query, cvm_engine)
+
+    return df if not df.empty else pd.DataFrame(columns=["ano", "liq_corrente", "liq_seca"])
 
 
-def get_analise_horizontal_bp(empresa, grupo_dfc):
+
+def get_analise_horizontal_bp(empresa, grupo_bp):
     '''Retorna uma análise horizontal do Balanço Patrimonial para todos os anos disponíveis'''
     query = f"""
     WITH dados AS (
@@ -199,7 +262,7 @@ def get_analise_horizontal_bp(empresa, grupo_dfc):
         AND b.ANO = v.ANO
     WHERE b.DENOM_CIA = '{empresa}'
         AND b.VL_CONTA <> 0
-        AND b.GRUPO_DFP = '{grupo_dfc}'
+        AND b.GRUPO_DFP = '{grupo_bp}'
         AND v.tipo_empresa = 'Instituição Não Financeira'
     GROUP BY
         b.CD_CONTA,

@@ -56,7 +56,8 @@ from src.queries_bp import (
     patrimonio_liquido,
     ativo_total,
     kpis_evolucao_ativo_passivo_pl,
-    get_analise_horizontal_bp
+    liquidez_todos_os_anos,
+    get_analise_horizontal_bp,
 )
 
 # ====================================
@@ -576,6 +577,27 @@ elif pagina == "Balanço Patrimonial":
             formato_y="monetario",
         )
 
+        # ====================================
+        # Gráficos de Linha
+        # ====================================     
+        
+
+        df = liquidez_todos_os_anos(empresa, grupo_bp)
+
+        st.write(df)
+        st.write(df.columns)
+        st.write(df.shape)
+
+        line_chart(
+            df=df,
+            col_x="ANO",
+            series=[
+                {"col": "liq_corrente", "label": "Liquidez Corrente"},
+                {"col": "liq_seca", "label": "Liquidez Seca"}
+            ],
+            titulo="Evolução da liquidez x Ano",
+            formato_y="numero",
+        )
 
         # ====================================
         # Tabela completa BP
