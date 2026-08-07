@@ -55,7 +55,8 @@ from src.queries_bp import (
     passivo_nao_circulante,
     patrimonio_liquido,
     ativo_total,
-    kpis_evolucao_ativo_passivo_pl
+    kpis_evolucao_ativo_passivo_pl,
+    get_analise_horizontal_bp
 )
 
 # ====================================
@@ -575,6 +576,37 @@ elif pagina == "Balanço Patrimonial":
             formato_y="monetario",
         )
 
+
+        # ====================================
+        # Tabela completa BP
+        # ====================================  
+
+        st.subheader("📈 Análise Horizontal Balanço Patrimonial")
+
+        df = get_analise_horizontal_bp(empresa, grupo_bp)
+
+        st.markdown(
+        """
+        <p style='text-align: right;
+        color: gray;
+        font-size: 0.85em;'>
+        Valores expressos em R$ mil
+        </p>
+        """,
+        unsafe_allow_html=True
+        )
+
+        df_fmt = formatar_brl_tabela(df)
+
+        st.dataframe(
+            formatar_variacao(df_fmt),
+            use_container_width=True,
+            hide_index=True
+        )
+
+
+
+
     else:
         custom_info(
             "<b>Instituição Financeira</b>: executada análise específica para este modelo de empresa",
@@ -582,3 +614,7 @@ elif pagina == "Balanço Patrimonial":
             cor_texto="#7a5c00",
             cor_borda="#f0b400"
         )
+
+
+
+

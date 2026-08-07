@@ -179,3 +179,58 @@ def kpis_evolucao_ativo_passivo_pl(empresa, grupo_bp):
     return df if not df.empty else pd.DataFrame(columns=["CD_CONTA", "ANO", "VL_CONTA"])
 
 
+
+def get_analise_horizontal_bp(empresa, grupo_dfc):
+    '''Retorna uma análise horizontal do Balanço Patrimonial para todos os anos disponíveis'''
+    query = f"""
+    WITH dados AS (
+    SELECT
+        b.CD_CONTA AS Conta,
+        b.DS_CONTA AS Descricao,
+        SUM(CASE WHEN b.ANO = 2021 THEN b.VL_CONTA ELSE 0 END) AS Ano_2021,
+        SUM(CASE WHEN b.ANO = 2022 THEN b.VL_CONTA ELSE 0 END) AS Ano_2022,
+        SUM(CASE WHEN b.ANO = 2023 THEN b.VL_CONTA ELSE 0 END) AS Ano_2023,
+        SUM(CASE WHEN b.ANO = 2024 THEN b.VL_CONTA ELSE 0 END) AS Ano_2024,
+        SUM(CASE WHEN b.ANO = 2025 THEN b.VL_CONTA ELSE 0 END) AS Ano_2025
+    FROM bp b
+    INNER JOIN vw_bp_tipo_empresa v
+        ON b.DENOM_CIA = v.DENOM_CIA
+        AND b.GRUPO_DFP = v.GRUPO_DFP
+        AND b.ANO = v.ANO
+    WHERE b.DENOM_CIA = '{empresa}'
+        AND b.VL_CONTA <> 0
+        AND b.GRUPO_DFP = '{grupo_dfc}'
+        AND v.tipo_empresa = 'Instituição Não Financeira'
+    GROUP BY
+        b.CD_CONTA,
+        b.DS_CONTA
+    )
+    SELECT
+        Conta,
+        Descricao,
+        Ano_2021,
+        "-" AS AH_2021,
+        Ano_2022,
+        ROUND(
+            (Ano_2022 - Ano_2021) * 100.0 /
+            NULLIF(Ano_2021, 0), 1
+        ) AS AH_2022,
+        Ano_2023,
+        ROUND(
+            (Ano_2023 - Ano_2022) * 100.0 /
+            NULLIF(Ano_2022, 0), 1
+        ) AS AH_2023,
+        Ano_2024,
+        ROUND(
+            (Ano_2024 - Ano_2023) * 100.0 /
+            NULLIF(Ano_2023, 0), 1
+        ) AS AH_2024,
+        Ano_2025,
+        ROUND(
+            (Ano_2025 - Ano_2024) * 100.0 /
+            NULLIF(Ano_2024, 0), 1
+        ) AS AH_2025
+    FROM dados
+    ORDER BY Conta;
+    """
+    return pd.read_sql(query, cvm_engine)
