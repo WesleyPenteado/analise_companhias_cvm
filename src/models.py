@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Numeric
+from sqlalchemy import Column, Integer, String, Date, Numeric, Index
 from sqlalchemy.orm import declarative_base
 from src.database import cvm_base, view_base
 
@@ -68,6 +68,9 @@ class BP_Model(cvm_base):
     ST_CONTA_FIXA = Column(String(1), nullable=False)  # "S" ou "N"
     ANO = Column(Integer, nullable=True)
 
+    __table_args__ = (
+            Index("idx_bp_lookup", "DENOM_CIA", "GRUPO_DFP", "CD_CONTA", "ANO"),
+        )
 
 class View_BP_Tipo_Anual_Model(view_base):
     __tablename__ = "vw_bp_tipo_anual"
