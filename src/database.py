@@ -12,7 +12,7 @@ CVM_URL = f"sqlite:///{DB_DIR / 'cvm.db'}"
 
 cvm_engine = create_engine(
     CVM_URL,
-    connect_args={"check_same_thread": False}
+    connect_args={"check_same_thread": False, "timeout": 10}
 )
 
 cvm_session = sessionmaker(
